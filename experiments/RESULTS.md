@@ -1,5 +1,7 @@
 # Experiment Results
 
+Benchmark execution has been requested from this repository revision. Results remain unrecorded until the benchmark workflow produces and verifies its artifacts.
+
 No end-to-end BANKING77 result is recorded yet.
 
 This file is intentionally kept free of performance claims until the repository commands produce reproducible artifacts.

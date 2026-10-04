@@ -11,6 +11,7 @@ model:
   name: hf-internal-testing/tiny-random-distilbert
   revision: main
   max_length: 32
+  ignore_mismatched_sizes: true
 lora:
   enabled: true
   r: 4

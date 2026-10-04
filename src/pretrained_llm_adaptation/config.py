@@ -22,6 +22,7 @@ class ModelConfig:
     name: str = "microsoft/deberta-v3-small"
     revision: str = "a59be8aa63396e73dbb45a1487e4cde4be98bfa4"
     max_length: int = 128
+    ignore_mismatched_sizes: bool = False
 
 
 @dataclass(frozen=True)

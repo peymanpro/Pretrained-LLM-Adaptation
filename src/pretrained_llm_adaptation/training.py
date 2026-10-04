@@ -120,6 +120,7 @@ def _load_model(config: ProjectConfig) -> tuple[Any, Any]:
         len(INTENTS),
         labels,
         inverse,
+        ignore_mismatched_sizes=config.model.ignore_mismatched_sizes,
     )
     return model, load_tokenizer(config.model.name, config.model.revision)
 

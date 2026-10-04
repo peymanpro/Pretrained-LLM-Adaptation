@@ -23,6 +23,7 @@ def load_sequence_classifier(
     num_labels: int,
     id2label: dict[int, str],
     label2id: dict[str, int],
+    ignore_mismatched_sizes: bool = False,
 ) -> Any:
     _, AutoModelForSequenceClassification, _ = require_transformers()
     return AutoModelForSequenceClassification.from_pretrained(
@@ -31,6 +32,7 @@ def load_sequence_classifier(
         num_labels=num_labels,
         id2label=id2label,
         label2id=label2id,
+        ignore_mismatched_sizes=ignore_mismatched_sizes,
     )
 
 

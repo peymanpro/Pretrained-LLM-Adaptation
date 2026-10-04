@@ -66,7 +66,9 @@ def main() -> None:
     )
     fit_validation_leakage = leakage(fit, validation)
     if fit_validation_leakage:
-        raise ValueError(f"Fit/validation text leakage detected: {len(fit_validation_leakage)} overlaps")
+        raise ValueError(
+            f"Fit/validation text leakage detected: {len(fit_validation_leakage)} overlaps"
+        )
     output = Path(config.dataset.processed_dir)
     _write_jsonl(output / "train.jsonl", fit)
     _write_jsonl(output / "validation.jsonl", validation)

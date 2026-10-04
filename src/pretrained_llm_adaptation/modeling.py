@@ -44,6 +44,7 @@ def load_tokenizer(
     return AutoTokenizer.from_pretrained(
         model_name,
         revision=revision,
+        use_fast=False,
     )
 
 

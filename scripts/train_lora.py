@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from pretrained_llm_adaptation.config import config_to_dict, load_config
@@ -13,8 +14,17 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/lora.yaml")
     parser.add_argument("--data-dir", default=None)
+    parser.add_argument("--epochs", type=float, default=None)
+    parser.add_argument("--experiment-name", default=None)
     args = parser.parse_args()
     config = load_config(args.config)
+    if args.epochs is not None:
+        config = replace(
+            config,
+            training=replace(config.training, num_train_epochs=args.epochs),
+        )
+    if args.experiment_name is not None:
+        config = replace(config, experiment_name=args.experiment_name)
     data_dir = Path(args.data_dir or config.dataset.processed_dir)
     metadata = train_lora(
         config,

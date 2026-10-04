@@ -80,35 +80,51 @@ jobs:
             python scripts/evaluate_model.py               --model-dir "artifacts/runs/$name"               --data data/processed/banking77/test.jsonl               --output "experiments/$name-evaluation.json"
           done
 
+      - name: Select best LoRA rank from validation
+        id: select-rank
+        env:
+          PYTHONPATH: src
+        run: |
+          rank=$(python scripts/select_rank.py \
+            --reports \
+            experiments/ablation-r4-validation.json \
+            experiments/ablation-r8-validation.json \
+            experiments/ablation-r16-validation.json)
+          echo "rank=$rank" >> "$GITHUB_OUTPUT"
+
       - name: Train final LoRA experiment
         env:
           PYTHONPATH: src
-        run: python scripts/train_lora.py --config configs/lora-benchmark.yaml
+        run: >-
+          python scripts/train_lora.py
+          --config configs/ablation-r${{ steps.select-rank.outputs.rank }}.yaml
+          --epochs 2
+          --experiment-name selected-r${{ steps.select-rank.outputs.rank }}-final
 
       - name: Evaluate final LoRA model
         env:
           PYTHONPATH: src
         run: >-
           python scripts/evaluate_model.py
-          --model-dir artifacts/runs/lora-r8-final
+          --model-dir artifacts/runs/selected-r${{ steps.select-rank.outputs.rank }}-final
           --adapter
           --data data/processed/banking77/test.jsonl
-          --output experiments/lora-r8-final-evaluation.json
+          --output experiments/selected-r${{ steps.select-rank.outputs.rank }}-final-evaluation.json
 
       - name: Analyze final errors
         env:
           PYTHONPATH: src
         run: >-
           python scripts/analyze_errors.py
-          experiments/lora-r8-final-evaluation.json
-          --output experiments/lora-r8-final-error-analysis.json
+          experiments/selected-r${{ steps.select-rank.outputs.rank }}-final-evaluation.json
+          --output experiments/selected-r${{ steps.select-rank.outputs.rank }}-final-error-analysis.json
 
       - name: Inference smoke
         env:
           PYTHONPATH: src
         run: >-
           python -m pretrained_llm_adaptation.cli predict
-          --model-dir artifacts/runs/lora-r8-final
+          --model-dir artifacts/runs/selected-r${{ steps.select-rank.outputs.rank }}-final
           --text "How long will my card take to arrive?"
 
       - name: Upload benchmark artifacts

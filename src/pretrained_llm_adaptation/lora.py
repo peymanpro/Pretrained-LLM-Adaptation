@@ -26,6 +26,7 @@ def apply_lora(
         raise RuntimeError("PEFT is required for LoRA operations.") from exc
 
     verify_target_modules(model, target_modules)
+    verify_target_modules(model, modules_to_save)
     config = LoraConfig(
         task_type=TaskType.SEQ_CLS,
         inference_mode=False,

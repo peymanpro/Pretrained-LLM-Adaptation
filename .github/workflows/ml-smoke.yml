@@ -1,0 +1,56 @@
+name: ML smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ml-smoke.yml"
+      - "configs/smoke.yaml"
+      - "scripts/prepare_data.py"
+      - "scripts/train_lora.py"
+      - "src/pretrained_llm_adaptation/**"
+      - "tests/fixtures/**"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CPU PyTorch
+        run: python -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install ML runtime
+        run: >-
+          python -m pip install --upgrade
+          "transformers>=5,<6"
+          "peft>=0.20,<1"
+          "datasets>=4,<5"
+          "accelerate>=1.8,<2"
+          "pyyaml>=6,<7"
+          "scikit-learn>=1.7,<2"
+
+      - name: Prepare fixture dataset
+        env:
+          PYTHONPATH: src
+        run: python scripts/prepare_data.py --config configs/smoke.yaml
+
+      - name: Train LoRA smoke model
+        env:
+          PYTHONPATH: src
+        run: python scripts/train_lora.py --config configs/smoke.yaml
+
+      - name: Verify adapter artifact
+        run: test -f artifacts/runs/smoke/adapter_config.json
+
+      - name: Upload smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lora-smoke-artifact
+          path: artifacts/runs/smoke/

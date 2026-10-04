@@ -1,0 +1,7 @@
+text,category
+How old do I need to be,age_limit
+Is there an age requirement,age_limit
+How long until my card arrives,card_arrival
+When should my card arrive,card_arrival
+What is the maximum cash withdrawal,top_up_limits
+How much can I top up,top_up_limits

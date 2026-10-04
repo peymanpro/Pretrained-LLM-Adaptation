@@ -138,6 +138,22 @@ def read_csv(path: str | Path) -> list[Sample]:
     return [Sample(text=str(row["text"]), label=str(row["category"])) for row in rows]
 
 
+def read_categories(path: str | Path) -> tuple[str, ...]:
+    values = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(values, list) or not all(isinstance(item, str) for item in values):
+        raise ValueError(f"Unexpected categories schema in {path}")
+    return tuple(values)
+
+
+def validate_categories(categories: tuple[str, ...]) -> list[str]:
+    errors: list[str] = []
+    if len(categories) != len(INTENTS):
+        errors.append(f"expected {len(INTENTS)} categories, found {len(categories)}")
+    if categories != INTENTS:
+        errors.append("categories.json does not match the pinned BANKING77 intent order")
+    return errors
+
+
 def validate_samples(samples: list[Sample]) -> list[str]:
     errors: list[str] = []
     for index, sample in enumerate(samples):
@@ -190,6 +206,13 @@ def write_manifest(
         "dataset": "PolyAI/banking77",
         "source_revision": source_revision,
         "counts": {split: len(items) for split, items in samples.items()},
+        "label_counts": {
+            split: {
+                label: sum(sample.label == label for sample in items)
+                for label in INTENTS
+            }
+            for split, items in samples.items()
+        },
         "validation_fraction": validation_fraction,
         "seed": seed,
         "labels": list(INTENTS),

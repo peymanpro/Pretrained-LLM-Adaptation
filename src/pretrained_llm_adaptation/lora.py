@@ -3,6 +3,20 @@ from __future__ import annotations
 from typing import Any
 
 
+def verify_target_modules(model: Any, target_modules: tuple[str, ...]) -> None:
+    names = [name for name, _ in model.named_modules()]
+    missing = [
+        target
+        for target in target_modules
+        if not any(name.endswith(target) for name in names)
+    ]
+    if missing:
+        raise ValueError(
+            "LoRA target modules were not found in the model: "
+            + ", ".join(missing)
+        )
+
+
 def apply_lora(
     model: Any,
     *,
@@ -17,6 +31,7 @@ def apply_lora(
     except ImportError as exc:
         raise RuntimeError("PEFT is required for LoRA operations.") from exc
 
+    verify_target_modules(model, target_modules)
     config = LoraConfig(
         task_type=TaskType.SEQ_CLS,
         inference_mode=False,
@@ -32,7 +47,9 @@ def apply_lora(
 
 def trainable_parameter_stats(model: Any) -> dict[str, int | float]:
     total = sum(parameter.numel() for parameter in model.parameters())
-    trainable = sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
+    trainable = sum(
+        parameter.numel() for parameter in model.parameters() if parameter.requires_grad
+    )
     return {
         "total_parameters": total,
         "trainable_parameters": trainable,

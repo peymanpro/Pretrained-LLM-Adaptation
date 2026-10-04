@@ -8,15 +8,29 @@ dataset:
   validation_fraction: 0.25
   seed: 42
 model:
-  name: distilbert-base-uncased
+  name: hf-internal-testing/tiny-random-distilbert
   revision: main
   max_length: 32
 lora:
-  enabled: false
+  enabled: true
   r: 4
   alpha: 8
   dropout: 0.0
   target_modules: [q_lin, v_lin]
   modules_to_save: [classifier]
 training:
+  learning_rate: 0.0001
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 1
+  num_train_epochs: 1
+  weight_decay: 0.0
+  warmup_ratio: 0.0
+  eval_strategy: epoch
+  save_strategy: epoch
+  logging_steps: 1
   seed: 42
+  fp16: false
+  bf16: false
+  output_dir: artifacts/runs
+  load_best_model_at_end: true

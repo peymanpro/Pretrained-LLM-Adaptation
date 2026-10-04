@@ -1,10 +1,21 @@
+from pathlib import Path
+
 from pretrained_llm_adaptation.data import (
+    INTENTS,
     Sample,
     duplicate_texts,
     leakage,
+    read_categories,
     split_train_validation,
+    validate_categories,
     validate_samples,
 )
+
+
+def test_official_intent_set_is_complete() -> None:
+    categories = read_categories(Path("tests/fixtures/categories.json"))
+    assert len(INTENTS) == 77
+    assert validate_categories(categories) == []
 
 
 def test_validation_and_duplicates() -> None:
@@ -33,7 +44,13 @@ def test_leakage_is_case_insensitive() -> None:
 
 
 def test_stratified_split_preserves_labels() -> None:
-    samples = [Sample(f"text {i}", "age_limit" if i < 4 else "card_arrival") for i in range(8)]
+    samples = [
+        Sample(
+            f"text {i}",
+            "age_limit" if i < 4 else "card_arrival",
+        )
+        for i in range(8)
+    ]
     train, validation = split_train_validation(samples, 0.25, 42)
     assert len(train) == 6
     assert len(validation) == 2

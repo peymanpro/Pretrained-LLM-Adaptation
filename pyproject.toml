@@ -14,6 +14,7 @@ dependencies = [
   "accelerate>=1.8",
   "datasets>=4.0",
   "peft>=0.20",
+  "protobuf>=5,<7",
   "pyyaml>=6.0",
   "safetensors>=0.5",
   "sentencepiece>=0.2",

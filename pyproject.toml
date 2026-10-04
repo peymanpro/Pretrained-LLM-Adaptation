@@ -22,6 +22,9 @@ dependencies = [
   "transformers>=5.0",
 ]
 
+[project.scripts]
+llm-adapt = "pretrained_llm_adaptation.cli:main"
+
 [project.optional-dependencies]
 dev = [
   "mypy>=1.15",

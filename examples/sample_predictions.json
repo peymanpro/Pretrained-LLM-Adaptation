@@ -1,0 +1,14 @@
+[
+  {
+    "text": "How long will my card take to arrive?",
+    "gold": "card_arrival",
+    "predicted": "card_arrival",
+    "confidence": 0.99
+  },
+  {
+    "text": "Why was my cash withdrawal declined?",
+    "gold": "declined_cash_withdrawal",
+    "predicted": "declined_cash_withdrawal",
+    "confidence": 0.98
+  }
+]

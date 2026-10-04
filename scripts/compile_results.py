@@ -93,7 +93,8 @@ def main() -> None:
     lines = [
         "# Experiment Results",
         "",
-        "| Experiment | Accuracy | Macro F1 | Weighted F1 | Trainable Params | Trainable % | Runtime (s) |",
+        "| Experiment | Accuracy | Macro F1 | Weighted F1 | "
+        "Trainable Params | Trainable % | Runtime (s) |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:

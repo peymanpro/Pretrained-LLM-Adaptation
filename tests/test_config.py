@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from pretrained_llm_adaptation.config import load_config
+
 
 def test_lora_config_loads() -> None:
     config = load_config(Path("configs/lora.yaml"))

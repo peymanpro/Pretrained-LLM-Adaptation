@@ -1,10 +1,15 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
+
 from .data import Sample
 from .evaluation import ClassificationMetrics, classification_metrics
+
 
 @dataclass
 class TfidfBaseline:
@@ -13,7 +18,7 @@ class TfidfBaseline:
     min_df: int = 1
 
     def __post_init__(self) -> None:
-        self.pipeline: Pipeline = Pipeline(
+        self.pipeline: Any = Pipeline(
             [
                 (
                     "tfidf",
@@ -26,7 +31,10 @@ class TfidfBaseline:
                 ),
                 (
                     "classifier",
-                    LogisticRegression(max_iter=2000, solver="lbfgs"),
+                    LogisticRegression(
+                        max_iter=2000,
+                        solver="lbfgs",
+                    ),
                 ),
             ]
         )
@@ -40,7 +48,9 @@ class TfidfBaseline:
     def predict(self, samples: list[Sample]) -> list[str]:
         return [
             str(value)
-            for value in self.pipeline.predict([sample.text for sample in samples])
+            for value in self.pipeline.predict(
+                [sample.text for sample in samples]
+            )
         ]
 
     def evaluate(self, samples: list[Sample]) -> ClassificationMetrics:
@@ -49,7 +59,11 @@ class TfidfBaseline:
             self.predict(samples),
         )
 
-def majority_predictions(train: list[Sample], samples: list[Sample]) -> list[str]:
+
+def majority_predictions(
+    train: list[Sample],
+    samples: list[Sample],
+) -> list[str]:
     if not train:
         raise ValueError("training samples cannot be empty")
     counts: dict[str, int] = {}

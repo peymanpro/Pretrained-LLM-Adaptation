@@ -4,6 +4,7 @@ from pretrained_llm_adaptation.baselines import (
 )
 from pretrained_llm_adaptation.data import Sample
 
+
 def dataset() -> tuple[list[Sample], list[Sample]]:
     train = [
         Sample("card arrived", "card_arrival"),
@@ -16,12 +17,14 @@ def dataset() -> tuple[list[Sample], list[Sample]]:
     ]
     return train, test
 
+
 def test_majority_baseline() -> None:
     train, test = dataset()
     assert majority_predictions(train, test) == [
         "card_arrival",
         "card_arrival",
     ]
+
 
 def test_tfidf_baseline() -> None:
     train, test = dataset()

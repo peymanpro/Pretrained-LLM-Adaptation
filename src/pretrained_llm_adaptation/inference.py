@@ -1,13 +1,17 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
+
 from .data import INTENTS
 from .modeling import load_tokenizer, require_transformers
+
 
 @dataclass(frozen=True)
 class Prediction:
     intent: str
     confidence: float
+
 
 def load_adapter_model(
     base_model: str,
@@ -18,20 +22,25 @@ def load_adapter_model(
         from peft import PeftModel
     except ImportError as exc:
         raise RuntimeError("PEFT is required for adapter inference.") from exc
+
     _, AutoModelForSequenceClassification, _ = require_transformers()
+    id2label = {index: label for index, label in enumerate(INTENTS)}
+    label2id = {label: index for index, label in id2label.items()}
     base = AutoModelForSequenceClassification.from_pretrained(
         base_model,
         revision=base_revision,
         num_labels=len(INTENTS),
-        id2label={i: label for i, label in enumerate(INTENTS)},
-        label2id={label: i for i, label in enumerate(INTENTS)},
+        id2label=id2label,
+        label2id=label2id,
     )
     model = PeftModel.from_pretrained(base, adapter_dir)
     tokenizer = load_tokenizer(base_model, base_revision)
     return model, tokenizer
 
+
 def predict(model: Any, tokenizer: Any, text: str) -> Prediction:
     import torch
+
     encoded = tokenizer(
         text,
         return_tensors="pt",

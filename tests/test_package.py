@@ -1,4 +1,4 @@
-"from pretrained_llm_adaptation import __version__
+from pretrained_llm_adaptation import __version__
 
 
 def test_package_exposes_version() -> None:

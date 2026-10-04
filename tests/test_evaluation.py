@@ -1,5 +1,6 @@
 from pretrained_llm_adaptation.evaluation import classification_metrics
 
+
 def test_metrics_are_deterministic() -> None:
     metrics = classification_metrics(
         ["a", "a", "b"],

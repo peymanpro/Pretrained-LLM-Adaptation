@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Any
+
 
 def require_transformers() -> tuple[Any, Any, Any]:
     try:
@@ -14,6 +16,7 @@ def require_transformers() -> tuple[Any, Any, Any]:
             "Install project dependencies first."
         ) from exc
     return AutoTokenizer, AutoModelForSequenceClassification, DataCollatorWithPadding
+
 
 def load_sequence_classifier(
     model_name: str,
@@ -31,9 +34,17 @@ def load_sequence_classifier(
         label2id=label2id,
     )
 
-def load_tokenizer(model_name: str, revision: str) -> Any:
+
+def load_tokenizer(
+    model_name: str,
+    revision: str,
+) -> Any:
     AutoTokenizer, _, _ = require_transformers()
-    return AutoTokenizer.from_pretrained(model_name, revision=revision)
+    return AutoTokenizer.from_pretrained(
+        model_name,
+        revision=revision,
+    )
+
 
 def inspect_lora_modules(model: Any) -> dict[str, list[str]]:
     linear_names: list[str] = []

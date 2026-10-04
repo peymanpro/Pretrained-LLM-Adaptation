@@ -6,6 +6,7 @@ from pretrained_llm_adaptation.data import (
     validate_samples,
 )
 
+
 def test_validation_and_duplicates() -> None:
     samples = [
         Sample("Hello", "age_limit"),
@@ -17,11 +18,13 @@ def test_validation_and_duplicates() -> None:
     assert any("unknown label" in error for error in errors)
     assert len(duplicate_texts(samples)) == 1
 
+
 def test_leakage_is_case_insensitive() -> None:
     assert leakage(
         [Sample("Hello", "age_limit")],
         [Sample(" hello ", "age_limit")],
     ) == {"hello"}
+
 
 def test_stratified_split_preserves_labels() -> None:
     samples = [

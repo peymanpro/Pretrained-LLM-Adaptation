@@ -19,7 +19,7 @@ def test_official_intent_set_is_complete() -> None:
 
 
 def test_validation_and_duplicates() -> None:
-    samples = [Sample(f"row {i}", "age_limit") for i in range(2)]
+    samples = [Sample("same row", "age_limit"), Sample("same row", "age_limit")]
     errors = validate_samples(samples)
     assert errors == []
     assert len(duplicate_texts(samples)) == 1

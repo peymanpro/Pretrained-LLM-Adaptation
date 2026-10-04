@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -74,7 +75,13 @@ def _trainer(
         gradient_accumulation_steps=config.training.gradient_accumulation_steps,
         num_train_epochs=config.training.num_train_epochs,
         weight_decay=config.training.weight_decay,
-        warmup_ratio=config.training.warmup_ratio,
+        warmup_steps=math.ceil(
+            len(train_ds)
+            / config.training.per_device_train_batch_size
+            / config.training.gradient_accumulation_steps
+            * config.training.num_train_epochs
+            * config.training.warmup_ratio
+        ),
         eval_strategy=config.training.eval_strategy,
         save_strategy=config.training.save_strategy,
         logging_steps=config.training.logging_steps,

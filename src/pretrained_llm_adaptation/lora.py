@@ -5,16 +5,9 @@ from typing import Any
 
 def verify_target_modules(model: Any, target_modules: tuple[str, ...]) -> None:
     names = [name for name, _ in model.named_modules()]
-    missing = [
-        target
-        for target in target_modules
-        if not any(name.endswith(target) for name in names)
-    ]
+    missing = [target for target in target_modules if not any(name.endswith(target) for name in names)]
     if missing:
-        raise ValueError(
-            "LoRA target modules were not found in the model: "
-            + ", ".join(missing)
-        )
+        raise ValueError("LoRA target modules were not found in the model: " + ", ".join(missing))
 
 
 def apply_lora(

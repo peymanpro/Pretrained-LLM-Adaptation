@@ -6,7 +6,7 @@ from pathlib import Path
 
 from pretrained_llm_adaptation.baselines import TfidfBaseline, majority_predictions
 from pretrained_llm_adaptation.config import load_config
-from pretrained_llm_adaptation.data import Sample, read_jsonl
+from pretrained_llm_adaptation.data import read_jsonl
 from pretrained_llm_adaptation.evaluation import detailed_report, save_json
 
 

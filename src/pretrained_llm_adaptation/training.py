@@ -12,6 +12,31 @@ from .modeling import load_sequence_classifier, load_tokenizer
 from .seed import set_seed
 
 
+
+
+def _limit_samples(
+    samples: list[Sample],
+    limit: int | None,
+    seed: int,
+) -> list[Sample]:
+    if limit is None or limit >= len(samples):
+        return samples
+    if limit < 1:
+        raise ValueError("sample limits must be positive")
+    labels = [sample.label for sample in samples]
+    if limit < len(set(labels)):
+        raise ValueError("sample limit must be at least the number of classes")
+    from sklearn.model_selection import train_test_split
+
+    selected, _ = train_test_split(
+        samples,
+        train_size=limit,
+        random_state=seed,
+        stratify=labels,
+    )
+    return list(selected)
+
+
 def _tokenize(tokenizer: Any, samples: list[Sample], max_length: int) -> Any:
     try:
         from datasets import Dataset
@@ -135,6 +160,12 @@ def train_lora(
     validation: list[Sample],
 ) -> dict[str, Any]:
     set_seed(config.training.seed)
+    train = _limit_samples(train, config.training.max_train_samples, config.training.seed)
+    validation = _limit_samples(
+        validation,
+        config.training.max_validation_samples,
+        config.training.seed,
+    )
     model, tokenizer = _load_model(config)
     model = apply_lora(
         model,

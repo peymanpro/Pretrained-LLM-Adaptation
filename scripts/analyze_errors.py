@@ -47,8 +47,7 @@ def main() -> None:
         "errors": len(errors),
         "error_rate": len(errors) / len(rows) if rows else None,
         "errors_by_gold_intent": [
-            {"intent": intent, "count": count}
-            for intent, count in errors_by_gold.most_common()
+            {"intent": intent, "count": count} for intent, count in errors_by_gold.most_common()
         ],
         "errors_by_length_bucket": dict(sorted(errors_by_length.items())),
         "top_confusions": [

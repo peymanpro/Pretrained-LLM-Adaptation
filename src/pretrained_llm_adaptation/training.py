@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import math
+import platform
+from importlib import metadata
 from pathlib import Path
 from typing import Any
 
@@ -132,6 +134,28 @@ def _load_model(config: ProjectConfig) -> tuple[Any, Any]:
     return model, load_tokenizer(config.model.name, config.model.revision)
 
 
+def _environment_metadata() -> dict[str, str]:
+    packages = (
+        "accelerate",
+        "datasets",
+        "peft",
+        "scikit-learn",
+        "torch",
+        "transformers",
+    )
+    versions: dict[str, str] = {}
+    for package in packages:
+        try:
+            versions[package] = metadata.version(package)
+        except metadata.PackageNotFoundError:
+            versions[package] = "not-installed"
+    return {
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "packages": versions,
+    }
+
+
 def _write_metadata(
     output_dir: Path,
     config: ProjectConfig,
@@ -151,6 +175,7 @@ def _write_metadata(
         "train_samples": train_size,
         "validation_samples": validation_size,
         "training_result": training_result,
+        "environment": _environment_metadata(),
     }
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "run_metadata.json").write_text(

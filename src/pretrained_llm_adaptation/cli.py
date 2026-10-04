@@ -41,7 +41,7 @@ def _predict(args: argparse.Namespace) -> None:
         args.revision,
         args.model_dir,
     )
-    result = predict(model, tokenizer, args.text)
+    result = predict(model, tokenizer, args.text, max_length=args.max_length)
     print(
         json.dumps(
             {

@@ -1,0 +1,120 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: benchmark
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]')
+    timeout-minutes: 300
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CPU PyTorch
+        run: python -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install ML runtime
+        run: >-
+          python -m pip install --upgrade
+          "transformers>=5,<6"
+          "peft>=0.20,<1"
+          "datasets>=4,<5"
+          "accelerate>=1.8,<2"
+          "pyyaml>=6,<7"
+          "scikit-learn>=1.7,<2"
+
+      - name: Download and validate BANKING77
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/download_data.py --config configs/lora-benchmark.yaml
+          python scripts/prepare_data.py --config configs/lora-benchmark.yaml
+
+      - name: Run classical baselines
+        env:
+          PYTHONPATH: src
+        run: python scripts/run_baselines.py --config configs/baseline.yaml
+
+      - name: Inspect DeBERTa architecture
+        env:
+          PYTHONPATH: src
+        run: python scripts/inspect_model.py --config configs/lora-benchmark.yaml
+
+      - name: Train frozen encoder baseline
+        env:
+          PYTHONPATH: src
+        run: python scripts/train_frozen.py --config configs/frozen-benchmark.yaml
+
+      - name: Evaluate frozen encoder
+        env:
+          PYTHONPATH: src
+        run: >-
+          python scripts/evaluate_model.py
+          --model-dir artifacts/runs/frozen-deberta
+          --data data/processed/banking77/test.jsonl
+          --output experiments/frozen-evaluation.json
+
+      - name: Run LoRA rank ablation
+        env:
+          PYTHONPATH: src
+        run: bash scripts/run_rank_ablation.sh
+
+      - name: Evaluate rank ablations
+        env:
+          PYTHONPATH: src
+        run: |
+          for name in ablation-r4 ablation-r8 ablation-r16; do
+            python scripts/evaluate_model.py               --model-dir "artifacts/runs/$name"               --data data/processed/banking77/test.jsonl               --output "experiments/$name-evaluation.json"
+          done
+
+      - name: Train final LoRA experiment
+        env:
+          PYTHONPATH: src
+        run: python scripts/train_lora.py --config configs/lora-benchmark.yaml
+
+      - name: Evaluate final LoRA model
+        env:
+          PYTHONPATH: src
+        run: >-
+          python scripts/evaluate_model.py
+          --model-dir artifacts/runs/lora-r8-final
+          --adapter
+          --data data/processed/banking77/test.jsonl
+          --output experiments/lora-r8-final-evaluation.json
+
+      - name: Analyze final errors
+        env:
+          PYTHONPATH: src
+        run: >-
+          python scripts/analyze_errors.py
+          experiments/lora-r8-final-evaluation.json
+          --output experiments/lora-r8-final-error-analysis.json
+
+      - name: Inference smoke
+        env:
+          PYTHONPATH: src
+        run: >-
+          python -m pretrained_llm_adaptation.cli predict
+          --model-dir artifacts/runs/lora-r8-final
+          --text "How long will my card take to arrive?"
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pretrained-llm-adaptation-benchmark
+          path: |
+            experiments/
+            artifacts/runs/

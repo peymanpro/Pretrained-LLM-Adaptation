@@ -51,10 +51,7 @@ def inspect_lora_modules(model: Any) -> dict[str, list[str]]:
         if module.__class__.__name__ in {"Linear", "Dense"}:
             linear_names.append(name)
     return {
-        "linear_modules": [
-            name
-            for name in linear_names
-        ],
+        "linear_modules": [name for name in linear_names],
         "classifier_candidates": [
             name for name, _ in model.named_modules() if "classifier" in name.lower()
         ],

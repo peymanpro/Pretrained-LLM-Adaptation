@@ -218,10 +218,7 @@ def write_manifest(
         "source_revision": source_revision,
         "counts": {split: len(items) for split, items in samples.items()},
         "label_counts": {
-            split: {
-                label: sum(sample.label == label for sample in items)
-                for label in INTENTS
-            }
+            split: {label: sum(sample.label == label for sample in items) for label in INTENTS}
             for split, items in samples.items()
         },
         "validation_fraction": validation_fraction,

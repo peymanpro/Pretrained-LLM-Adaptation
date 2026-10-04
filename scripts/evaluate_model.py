@@ -45,7 +45,7 @@ def _predict(
 def _load_model(args: argparse.Namespace) -> tuple[Any, Any]:
     try:
         from peft import PeftModel
-        from transformers import AutoModelForSequenceClassification
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
     except ImportError as exc:
         raise RuntimeError("Transformers and PEFT are required for evaluation.") from exc
 
@@ -63,7 +63,12 @@ def _load_model(args: argparse.Namespace) -> tuple[Any, Any]:
         if args.adapter
         else AutoModelForSequenceClassification.from_pretrained(args.model_dir)
     )
-    tokenizer = load_tokenizer(args.model_name, args.revision)
+    tokenizer_path = Path(args.model_dir) / "tokenizer_config.json"
+    tokenizer = (
+        AutoTokenizer.from_pretrained(args.model_dir)
+        if tokenizer_path.exists()
+        else load_tokenizer(args.model_name, args.revision)
+    )
     return model, tokenizer
 
 
@@ -75,7 +80,7 @@ def main() -> None:
         "--model-name",
         default="microsoft/deberta-v3-small",
     )
-    parser.add_argument("--revision", default="main")
+    parser.add_argument("--revision", default="a59be8aa63396e73dbb45a1487e4cde4be98bfa4")
     parser.add_argument(
         "--data",
         default="data/processed/banking77/test.jsonl",

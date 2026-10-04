@@ -52,18 +52,12 @@ def main() -> None:
         raise ValueError("Dataset validation failed: " + "; ".join(errors[:10]))
 
     train_test_leakage = leakage(train, test)
-    train_labels = {
-        sample.text.strip().casefold(): sample.label
-        for sample in train
-    }
+    train_labels = {sample.text.strip().casefold(): sample.label for sample in train}
+    test_labels = {sample.text.strip().casefold(): sample.label for sample in test}
     conflicting_labels = {
         text
         for text in train_test_leakage
-        if train_labels[text] != next(
-            sample.label
-            for sample in test
-            if sample.text.strip().casefold() == text
-        )
+        if train_labels[text] != test_labels[text]
     }
     if conflicting_labels:
         raise ValueError(

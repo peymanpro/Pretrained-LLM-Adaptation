@@ -77,7 +77,7 @@ jobs:
           PYTHONPATH: src
         run: |
           for name in ablation-r4 ablation-r8 ablation-r16; do
-            python scripts/evaluate_model.py               --model-dir "artifacts/runs/$name"               --data data/processed/banking77/test.jsonl               --output "experiments/$name-evaluation.json"
+            python scripts/evaluate_model.py               --model-dir "artifacts/runs/$name"               --adapter               --data "data/processed/banking77/test.jsonl"               --output "experiments/$name-evaluation.json"
           done
 
       - name: Select best LoRA rank from validation
@@ -89,7 +89,8 @@ jobs:
             --reports \
             experiments/ablation-r4-validation.json \
             experiments/ablation-r8-validation.json \
-            experiments/ablation-r16-validation.json)
+            experiments/ablation-r16-validation.json \
+            --output experiments/selected-rank.json)
           echo "rank=$rank" >> "$GITHUB_OUTPUT"
 
       - name: Train final LoRA experiment
@@ -100,6 +101,7 @@ jobs:
           --config configs/ablation-r${{ steps.select-rank.outputs.rank }}.yaml
           --epochs 2
           --experiment-name selected-r${{ steps.select-rank.outputs.rank }}-final
+          --full-data
 
       - name: Evaluate final LoRA model
         env:

@@ -40,6 +40,11 @@ def main() -> None:
     train = read_csv(raw / "train.csv")
     test = read_csv(raw / "test.csv")
 
+    categories = read_categories(raw / "categories.json")
+    category_errors = validate_categories(categories)
+    if category_errors:
+        raise ValueError("Category validation failed: " + "; ".join(category_errors))
+
     errors = validate_samples(train) + validate_samples(test)
     if errors:
         raise ValueError("Dataset validation failed: " + "; ".join(errors[:10]))
@@ -57,6 +62,12 @@ def main() -> None:
         config.dataset.validation_fraction,
         config.dataset.seed,
     )
+    fit_validation_leakage = leakage(fit, validation)
+    if fit_validation_leakage:
+        raise ValueError(
+            "Fit/validation text leakage detected: "
+            f"{len(fit_validation_leakage)} overlaps"
+        )
     output = Path(config.dataset.processed_dir)
     _write_jsonl(output / "train.jsonl", fit)
     _write_jsonl(output / "validation.jsonl", validation)

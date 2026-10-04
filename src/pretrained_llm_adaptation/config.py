@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
+
 import yaml
+
 
 @dataclass(frozen=True)
 class DatasetConfig:
@@ -13,11 +16,13 @@ class DatasetConfig:
     validation_fraction: float = 0.2
     seed: int = 42
 
+
 @dataclass(frozen=True)
 class ModelConfig:
     name: str = "microsoft/deberta-v3-small"
     revision: str = "main"
     max_length: int = 128
+
 
 @dataclass(frozen=True)
 class LoRAConfig:
@@ -27,6 +32,7 @@ class LoRAConfig:
     dropout: float = 0.1
     target_modules: tuple[str, ...] = ("query", "value")
     modules_to_save: tuple[str, ...] = ("classifier", "pooler")
+
 
 @dataclass(frozen=True)
 class TrainingConfig:
@@ -46,6 +52,7 @@ class TrainingConfig:
     output_dir: str = "artifacts/runs"
     load_best_model_at_end: bool = True
 
+
 @dataclass(frozen=True)
 class ProjectConfig:
     experiment_name: str = "lora-r8"
@@ -55,12 +62,14 @@ class ProjectConfig:
     lora: LoRAConfig = field(default_factory=LoRAConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
 
+
 def _tuple(value: Any) -> tuple[str, ...]:
     if isinstance(value, str):
         return (value,)
     if not isinstance(value, list):
         raise ValueError("Expected a list of module names")
     return tuple(str(item) for item in value)
+
 
 def load_config(path: str | Path) -> ProjectConfig:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
@@ -83,6 +92,7 @@ def load_config(path: str | Path) -> ProjectConfig:
         lora=lora,
         training=training,
     )
+
 
 def config_to_dict(config: ProjectConfig) -> dict[str, Any]:
     return asdict(config)

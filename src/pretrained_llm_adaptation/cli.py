@@ -1,7 +1,11 @@
 """Command-line entry point for the adaptation study."""
+
 from __future__ import annotations
+
 import argparse
+
 from pretrained_llm_adaptation import __version__
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Pretrained LLM Adaptation")
@@ -11,6 +15,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "version":
         print(__version__)
+
 
 if __name__ == "__main__":
     main()

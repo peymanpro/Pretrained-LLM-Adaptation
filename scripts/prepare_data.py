@@ -58,10 +58,7 @@ def main() -> None:
         text for text in train_test_leakage if train_labels[text] != test_labels[text]
     }
     if conflicting_labels:
-        raise ValueError(
-            "Conflicting train/test labels for identical text: "
-            f"{len(conflicting_labels)} cases"
-        )
+        raise ValueError(f"Conflicting train/test labels for identical text: {len(conflicting_labels)} cases")
     if train_test_leakage:
         print(
             "warning: official BANKING77 split contains "

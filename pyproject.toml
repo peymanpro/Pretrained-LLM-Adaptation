@@ -6,14 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "pretrained-llm-adaptation"
 version = "0.1.0"
 description = "A reproducible study of adapting a pretrained language model to a concrete downstream NLP task."
-readme = "docs/PROJECT-SCOPE.md"
+readme = "README.md"
 requires-python = ">=3.12,<3.14"
 license = { text = "MIT" }
 authors = [{ name = "Peyman Salimi" }]
 dependencies = [
   "accelerate>=1.8",
   "datasets>=4.0",
-  "pandas>=2.2",
   "peft>=0.20",
   "pyyaml>=6.0",
   "safetensors>=0.5",
@@ -46,7 +45,7 @@ addopts = "-q"
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["src", "tests"]
+src = ["src", "tests", "scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -55,6 +54,10 @@ select = ["E", "F", "I", "UP", "B"]
 python_version = "3.12"
 strict = true
 mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "yaml"]
+ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["pretrained_llm_adaptation"]

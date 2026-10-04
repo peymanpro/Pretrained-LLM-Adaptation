@@ -12,6 +12,7 @@ from pretrained_llm_adaptation.modeling import inspect_lora_modules, load_sequen
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/lora.yaml")
+    parser.add_argument("--output", default=None)
     args = parser.parse_args()
     config = load_config(args.config)
     id2label = {index: label for index, label in enumerate(INTENTS)}
@@ -23,17 +24,20 @@ def main() -> None:
         id2label,
         label2id,
     )
-    print(
-        json.dumps(
-            {
-                "model": config.model.name,
-                "revision": config.model.revision,
-                "modules": inspect_lora_modules(model),
-                "parameters": trainable_parameter_stats(model),
-            },
-            indent=2,
-        )
-    )
+    payload = {
+        "model": config.model.name,
+        "revision": config.model.revision,
+        "modules": inspect_lora_modules(model),
+        "parameters": trainable_parameter_stats(model),
+    }
+    rendered = json.dumps(payload, indent=2)
+    if args.output:
+        from pathlib import Path
+
+        target = Path(args.output)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(rendered + "\n", encoding="utf-8")
+    print(rendered)
 
 
 if __name__ == "__main__":

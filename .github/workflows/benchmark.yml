@@ -51,7 +51,10 @@ jobs:
       - name: Inspect DeBERTa architecture
         env:
           PYTHONPATH: src
-        run: python scripts/inspect_model.py --config configs/lora-benchmark.yaml
+        run: >-
+          python scripts/inspect_model.py
+          --config configs/lora-benchmark.yaml
+          --output experiments/model-inspection.json
 
       - name: Train frozen encoder baseline
         env:

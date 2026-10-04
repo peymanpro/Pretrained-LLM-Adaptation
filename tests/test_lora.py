@@ -16,8 +16,10 @@ class Model:
 
     def named_modules(self):
         return [
-            ("encoder.layer.0.attention.query", object()),
-            ("encoder.layer.0.attention.value", object()),
+            ("encoder.layer.0.attention.query_proj", object()),
+            ("encoder.layer.0.attention.value_proj", object()),
+            ("classifier", object()),
+            ("pooler", object()),
         ]
 
 
@@ -32,4 +34,4 @@ def test_trainable_parameter_stats() -> None:
 
 
 def test_lora_target_module_verification() -> None:
-    verify_target_modules(Model(), ("query", "value"))
+    verify_target_modules(Model(), ("query_proj", "value_proj"))

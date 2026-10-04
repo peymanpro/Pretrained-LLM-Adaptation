@@ -25,7 +25,7 @@ Full fine-tuning is conditional on available compute.
 
 ## LoRA configuration
 
-The initial configuration targets query/value attention projections with rank 8, alpha 16, dropout 0.1, and explicitly saved task modules. The exact target module names must be inspected on the instantiated model before the first training run.
+The initial configuration targets query_proj/value_proj attention projections with rank 8, alpha 16, dropout 0.1, and explicitly saved task modules. The exact target module names must be inspected on the instantiated model before the first training run.
 
 PEFT documents modules_to_save as the mechanism for training and saving additional modules alongside adapter weights.
 

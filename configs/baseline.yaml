@@ -1,0 +1,18 @@
+experiment_name: baseline
+task: banking77-intent-classification
+
+dataset:
+  name: PolyAI/banking77
+  source_revision: 57ec275d8078af65b7731c2a98be812d844a6d6b
+  raw_dir: data/raw/banking77
+  processed_dir: data/processed/banking77
+  validation_fraction: 0.2
+  seed: 42
+
+model:
+  name: microsoft/deberta-v3-small
+  revision: main
+  max_length: 128
+
+training:
+  seed: 42

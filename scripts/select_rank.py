@@ -21,9 +21,7 @@ def main() -> None:
     for report_path in args.reports:
         payload = json.loads(report_path.read_text(encoding="utf-8"))
         metrics = payload["report"]["metrics"]
-        rank = int(
-            report_path.stem.split("ablation-r", 1)[1].split("-validation", 1)[0]
-        )
+        rank = int(report_path.stem.split("ablation-r", 1)[1].split("-validation", 1)[0])
         candidates.append(
             {
                 "rank": rank,

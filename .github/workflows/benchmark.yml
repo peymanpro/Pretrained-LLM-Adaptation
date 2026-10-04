@@ -129,6 +129,19 @@ jobs:
           --model-dir artifacts/runs/selected-r${{ steps.select-rank.outputs.rank }}-final
           --text "How long will my card take to arrive?"
 
+      - name: Compare frozen and final predictions
+        env:
+          PYTHONPATH: src
+        run: >-
+          python scripts/compare_predictions.py
+          experiments/frozen-evaluation.json
+          experiments/selected-r${{ steps.select-rank.outputs.rank }}-final-evaluation.json
+          --output experiments/frozen-vs-final-changes.json
+
+      - name: Compile benchmark results
+        env:
+          PYTHONPATH: src
+        run: python scripts/compile_results.py
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v4
         with:

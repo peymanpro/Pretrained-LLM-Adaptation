@@ -34,6 +34,8 @@ jobs:
           "datasets>=4,<5"
           "accelerate>=1.8,<2"
           "pyyaml>=6,<7"
+          "sentencepiece>=0.2,<1"
+          "tiktoken>=0.9,<1"
           "scikit-learn>=1.7,<2"
 
       - name: Download and validate BANKING77

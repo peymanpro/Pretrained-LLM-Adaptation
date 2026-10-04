@@ -31,7 +31,7 @@ class LoRAConfig:
     r: int = 8
     alpha: int = 16
     dropout: float = 0.1
-    target_modules: tuple[str, ...] = ("query", "value")
+    target_modules: tuple[str, ...] = ("query_proj", "value_proj")
     modules_to_save: tuple[str, ...] = ("classifier", "pooler")
 
 

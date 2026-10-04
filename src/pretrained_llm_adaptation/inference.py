@@ -38,14 +38,14 @@ def load_adapter_model(
     return model, tokenizer
 
 
-def predict(model: Any, tokenizer: Any, text: str) -> Prediction:
+def predict(model: Any, tokenizer: Any, text: str, max_length: int = 128) -> Prediction:
     import torch
 
     encoded = tokenizer(
         text,
         return_tensors="pt",
         truncation=True,
-        max_length=128,
+        max_length=max_length,
     )
     with torch.no_grad():
         output = model(**encoded)

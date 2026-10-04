@@ -5,7 +5,7 @@ dataset:
   source_revision: 57ec275d8078af65b7731c2a98be812d844a6d6b
   raw_dir: tests/fixtures
   processed_dir: tests/fixtures/processed
-  validation_fraction: 0.25
+  validation_fraction: 0.5
   seed: 42
 model:
   name: hf-internal-testing/tiny-random-distilbert

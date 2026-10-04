@@ -51,6 +51,8 @@ class TrainingConfig:
     bf16: bool = False
     output_dir: str = "artifacts/runs"
     load_best_model_at_end: bool = True
+    max_train_samples: int | None = None
+    max_validation_samples: int | None = None
 
 
 @dataclass(frozen=True)

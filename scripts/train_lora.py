@@ -16,6 +16,11 @@ def main() -> None:
     parser.add_argument("--data-dir", default=None)
     parser.add_argument("--epochs", type=float, default=None)
     parser.add_argument("--experiment-name", default=None)
+    parser.add_argument(
+        "--full-data",
+        action="store_true",
+        help="Disable training/validation sample caps from the config.",
+    )
     args = parser.parse_args()
     config = load_config(args.config)
     if args.epochs is not None:
@@ -25,6 +30,15 @@ def main() -> None:
         )
     if args.experiment_name is not None:
         config = replace(config, experiment_name=args.experiment_name)
+    if args.full_data:
+        config = replace(
+            config,
+            training=replace(
+                config.training,
+                max_train_samples=None,
+                max_validation_samples=None,
+            ),
+        )
     data_dir = Path(args.data_dir or config.dataset.processed_dir)
     metadata = train_lora(
         config,

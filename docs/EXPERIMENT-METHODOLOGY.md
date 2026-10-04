@@ -40,3 +40,9 @@ The default rank ablation is r = 4, 8, and 16. Final conclusions must be based o
 ## Evidence rule
 
 A result is measured only when the command completes and the generated artifact can be tied back to a concrete configuration. This repository never substitutes an external benchmark number for a result produced by the local pipeline.
+
+## Controlled benchmark execution
+
+The full benchmark is intentionally not executed on every push. It is started explicitly with the `[run-experiment]` commit marker or through the GitHub Actions workflow dispatcher.
+
+The benchmark produces the classical baselines, frozen-representation baseline, LoRA rank ablation, validation-based rank selection, a full-data final LoRA run, held-out test evaluation, structured error analysis, prediction comparison, model inspection, inference smoke output, and a compiled results summary.

@@ -1,3 +1,7 @@
+concurrency:
+  group: ml-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
 name: ML smoke
 
 on:

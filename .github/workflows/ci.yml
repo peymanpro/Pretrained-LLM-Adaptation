@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install development tools
+        run: python -m pip install --upgrade "pytest>=9,<10" "ruff>=0.13,<1" "mypy>=1.15,<2"
+
+      - name: Ruff lint
+        run: ruff check src tests
+
+      - name: Ruff format check
+        run: ruff format --check src tests
+
+      - name: Type check
+        run: mypy src
+
+      - name: Unit tests
+        env:
+          PYTHONPATH: src
+        run: pytest
+
+      - name: CLI smoke test
+        env:
+          PYTHONPATH: src
+        run: python -m pretrained_llm_adaptation.cli --version

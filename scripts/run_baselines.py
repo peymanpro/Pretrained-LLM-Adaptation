@@ -6,16 +6,10 @@ from pathlib import Path
 
 from pretrained_llm_adaptation.baselines import TfidfBaseline, majority_predictions
 from pretrained_llm_adaptation.config import load_config
-from pretrained_llm_adaptation.data import Sample
+from pretrained_llm_adaptation.data import Sample, read_jsonl
 from pretrained_llm_adaptation.evaluation import detailed_report, save_json
 
 
-def _load_jsonl(path: Path) -> list[Sample]:
-    rows = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/baseline.yaml")
@@ -24,8 +18,8 @@ def main() -> None:
     args = parser.parse_args()
     config = load_config(args.config)
     data_dir = Path(args.data_dir or config.dataset.processed_dir)
-    train = _load_jsonl(data_dir / "train.jsonl")
-    test = _load_jsonl(data_dir / "test.jsonl")
+    train = read_jsonl(data_dir / "train.jsonl")
+    test = read_jsonl(data_dir / "test.jsonl")
     labels = sorted({sample.label for sample in train + test})
 
     majority = majority_predictions(train, test)

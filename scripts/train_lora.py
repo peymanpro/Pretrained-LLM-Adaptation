@@ -5,16 +5,10 @@ import json
 from pathlib import Path
 
 from pretrained_llm_adaptation.config import config_to_dict, load_config
-from pretrained_llm_adaptation.data import Sample
+from pretrained_llm_adaptation.data import read_jsonl
 from pretrained_llm_adaptation.training import train_lora
 
 
-def _load_jsonl(path: Path) -> list[Sample]:
-    rows = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/lora.yaml")
@@ -24,8 +18,8 @@ def main() -> None:
     data_dir = Path(args.data_dir or config.dataset.processed_dir)
     metadata = train_lora(
         config,
-        _load_jsonl(data_dir / "train.jsonl"),
-        _load_jsonl(data_dir / "validation.jsonl"),
+        read_jsonl(data_dir / "train.jsonl"),
+        read_jsonl(data_dir / "validation.jsonl"),
     )
     print(
         json.dumps(

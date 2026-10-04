@@ -130,6 +130,17 @@ def download_banking77(raw_dir: str | Path, revision: str) -> dict[str, str]:
     return {key: str(path) for key, path in paths.items()}
 
 
+def read_jsonl(path: str | Path) -> list[Sample]:
+    rows = [
+        json.loads(line)
+        for line in Path(path).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    if not all(isinstance(row, dict) for row in rows):
+        raise ValueError(f"Unexpected JSONL row in {path}")
+    return [Sample(text=str(row["text"]), label=str(row["label"])) for row in rows]
+
+
 def read_csv(path: str | Path) -> list[Sample]:
     with Path(path).open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))

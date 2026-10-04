@@ -5,17 +5,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-from pretrained_llm_adaptation.data import INTENTS, Sample
+from pretrained_llm_adaptation.data import INTENTS, Sample, read_jsonl
 from pretrained_llm_adaptation.evaluation import detailed_report, save_json
 from pretrained_llm_adaptation.modeling import load_tokenizer
 
 
-def _load_jsonl(path: Path) -> list[Sample]:
-    rows = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
 def _predict(
     model: Any,
     tokenizer: Any,
@@ -95,7 +89,7 @@ def main() -> None:
     args = parser.parse_args()
 
     model, tokenizer = _load_model(args)
-    samples = _load_jsonl(Path(args.data))
+    samples = read_jsonl(Path(args.data))
     predictions, confidences = _predict(
         model,
         tokenizer,

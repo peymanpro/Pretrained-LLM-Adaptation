@@ -7,9 +7,7 @@ from pathlib import Path
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Summarize structured classification errors"
-    )
+    parser = argparse.ArgumentParser(description="Summarize structured classification errors")
     parser.add_argument("predictions", type=Path)
     parser.add_argument(
         "--output",
@@ -20,14 +18,8 @@ def main() -> None:
     rows = json.loads(args.predictions.read_text(encoding="utf-8"))
     if isinstance(rows, dict):
         rows = rows["predictions"]
-    errors = [
-        row for row in rows
-        if row["gold"] != row["predicted"]
-    ]
-    confusion = Counter(
-        (row["gold"], row["predicted"])
-        for row in errors
-    )
+    errors = [row for row in rows if row["gold"] != row["predicted"]]
+    confusion = Counter((row["gold"], row["predicted"]) for row in errors)
     payload = {
         "total": len(rows),
         "errors": len(errors),

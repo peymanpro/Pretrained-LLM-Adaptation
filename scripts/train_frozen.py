@@ -10,11 +10,7 @@ from pretrained_llm_adaptation.training import train_frozen
 
 
 def _load_jsonl(path: Path) -> list[Sample]:
-    rows = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     return [Sample(text=row["text"], label=row["label"]) for row in rows]
 
 

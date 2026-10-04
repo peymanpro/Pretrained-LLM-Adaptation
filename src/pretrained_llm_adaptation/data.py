@@ -151,18 +151,14 @@ def validate_samples(samples: list[Sample]) -> list[str]:
 def duplicate_texts(samples: list[Sample]) -> dict[str, list[int]]:
     index: dict[str, list[int]] = {}
     for sample_index, sample in enumerate(samples):
-        digest = hashlib.sha256(
-            sample.text.strip().casefold().encode("utf-8")
-        ).hexdigest()
+        digest = hashlib.sha256(sample.text.strip().casefold().encode("utf-8")).hexdigest()
         index.setdefault(digest, []).append(sample_index)
     return {digest: positions for digest, positions in index.items() if len(positions) > 1}
 
 
 def leakage(train: list[Sample], other: list[Sample]) -> set[str]:
     train_keys = {sample.text.strip().casefold() for sample in train}
-    return train_keys.intersection(
-        sample.text.strip().casefold() for sample in other
-    )
+    return train_keys.intersection(sample.text.strip().casefold() for sample in other)
 
 
 def split_train_validation(

@@ -42,15 +42,11 @@ def main() -> None:
 
     errors = validate_samples(train) + validate_samples(test)
     if errors:
-        raise ValueError(
-            "Dataset validation failed: " + "; ".join(errors[:10])
-        )
+        raise ValueError("Dataset validation failed: " + "; ".join(errors[:10]))
 
     train_test_leakage = leakage(train, test)
     if train_test_leakage:
-        raise ValueError(
-            f"Train/test text leakage detected: {len(train_test_leakage)} overlaps"
-        )
+        raise ValueError(f"Train/test text leakage detected: {len(train_test_leakage)} overlaps")
 
     duplicates = duplicate_texts(train)
     if duplicates:

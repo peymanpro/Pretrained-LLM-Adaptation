@@ -32,11 +32,7 @@ def apply_lora(
 
 def trainable_parameter_stats(model: Any) -> dict[str, int | float]:
     total = sum(parameter.numel() for parameter in model.parameters())
-    trainable = sum(
-        parameter.numel()
-        for parameter in model.parameters()
-        if parameter.requires_grad
-    )
+    trainable = sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
     return {
         "total_parameters": total,
         "trainable_parameters": trainable,

@@ -46,12 +46,7 @@ class TfidfBaseline:
         )
 
     def predict(self, samples: list[Sample]) -> list[str]:
-        return [
-            str(value)
-            for value in self.pipeline.predict(
-                [sample.text for sample in samples]
-            )
-        ]
+        return [str(value) for value in self.pipeline.predict([sample.text for sample in samples])]
 
     def evaluate(self, samples: list[Sample]) -> ClassificationMetrics:
         return classification_metrics(

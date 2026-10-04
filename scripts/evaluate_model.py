@@ -11,11 +11,7 @@ from pretrained_llm_adaptation.modeling import load_tokenizer
 
 
 def _load_jsonl(path: Path) -> list[Sample]:
-    rows = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     return [Sample(text=row["text"], label=row["label"]) for row in rows]
 
 
@@ -46,8 +42,7 @@ def _predict(
         indices = torch.argmax(probabilities, dim=-1)
         predictions.extend(INTENTS[int(index)] for index in indices)
         confidences.extend(
-            float(probabilities[row, indices[row]].item())
-            for row in range(len(batch))
+            float(probabilities[row, indices[row]].item()) for row in range(len(batch))
         )
     return predictions, confidences
 
@@ -57,9 +52,7 @@ def _load_model(args: argparse.Namespace) -> tuple[Any, Any]:
         from peft import PeftModel
         from transformers import AutoModelForSequenceClassification
     except ImportError as exc:
-        raise RuntimeError(
-            "Transformers and PEFT are required for evaluation."
-        ) from exc
+        raise RuntimeError("Transformers and PEFT are required for evaluation.") from exc
 
     id2label = {index: label for index, label in enumerate(INTENTS)}
     label2id = {label: index for index, label in id2label.items()}

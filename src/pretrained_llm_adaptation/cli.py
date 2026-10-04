@@ -24,6 +24,7 @@ def main() -> None:
         "--revision",
         default="a59be8aa63396e73dbb45a1487e4cde4be98bfa4",
     )
+    predict_parser.add_argument("--max-length", type=int, default=128)
     predict_parser.set_defaults(handler=_predict)
 
     args = parser.parse_args()
@@ -43,7 +44,13 @@ def _predict(args: argparse.Namespace) -> None:
     result = predict(model, tokenizer, args.text)
     print(
         json.dumps(
-            {"intent": result.intent, "confidence": result.confidence},
+            {
+                "model": args.model_name,
+                "revision": args.revision,
+                "adapter": args.model_dir,
+                "intent": result.intent,
+                "confidence": result.confidence,
+            },
             ensure_ascii=False,
         )
     )

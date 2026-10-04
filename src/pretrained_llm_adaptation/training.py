@@ -134,7 +134,7 @@ def _load_model(config: ProjectConfig) -> tuple[Any, Any]:
     return model, load_tokenizer(config.model.name, config.model.revision)
 
 
-def _environment_metadata() -> dict[str, str]:
+def _environment_metadata() -> dict[str, object]:
     packages = (
         "accelerate",
         "datasets",

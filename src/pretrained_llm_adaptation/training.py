@@ -218,7 +218,7 @@ def train_frozen(
 
     train_ds = _tokenize(tokenizer, train, config.model.max_length)
     val_ds = _tokenize(tokenizer, validation, config.model.max_length)
-    output_dir = Path(config.training.output_dir) / f"{config.experiment_name}-frozen"
+    output_dir = Path(config.training.output_dir) / config.experiment_name
     trainer = _trainer(model, tokenizer, train_ds, val_ds, config, output_dir)
     result = trainer.train()
     trainer.save_model(str(output_dir))

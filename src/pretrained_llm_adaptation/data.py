@@ -212,6 +212,8 @@ def write_manifest(
     samples: dict[str, list[Sample]],
     validation_fraction: float,
     seed: int,
+    train_test_overlap_count: int = 0,
+    fit_validation_overlap_count: int = 0,
 ) -> None:
     payload = {
         "dataset": "PolyAI/banking77",
@@ -223,6 +225,10 @@ def write_manifest(
         },
         "validation_fraction": validation_fraction,
         "seed": seed,
+        "audit": {
+            "train_test_exact_overlap_count": train_test_overlap_count,
+            "fit_validation_exact_overlap_count": fit_validation_overlap_count,
+        },
         "labels": list(INTENTS),
     }
     target = Path(destination)

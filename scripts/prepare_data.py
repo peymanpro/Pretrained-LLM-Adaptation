@@ -52,8 +52,29 @@ def main() -> None:
         raise ValueError("Dataset validation failed: " + "; ".join(errors[:10]))
 
     train_test_leakage = leakage(train, test)
+    train_labels = {
+        sample.text.strip().casefold(): sample.label
+        for sample in train
+    }
+    conflicting_labels = {
+        text
+        for text in train_test_leakage
+        if train_labels[text] != next(
+            sample.label
+            for sample in test
+            if sample.text.strip().casefold() == text
+        )
+    }
+    if conflicting_labels:
+        raise ValueError(
+            "Conflicting train/test labels for identical text: "
+            f"{len(conflicting_labels)} cases"
+        )
     if train_test_leakage:
-        raise ValueError(f"Train/test text leakage detected: {len(train_test_leakage)} overlaps")
+        print(
+            "warning: official BANKING77 split contains "
+            f"{len(train_test_leakage)} exact train/test text overlaps"
+        )
 
     duplicates = duplicate_texts(train)
     if duplicates:
@@ -79,6 +100,8 @@ def main() -> None:
         {"train": fit, "validation": validation, "test": test},
         config.dataset.validation_fraction,
         config.dataset.seed,
+        train_test_overlap_count=len(train_test_leakage),
+        fit_validation_overlap_count=len(fit_validation_leakage),
     )
     print(
         "counts:",

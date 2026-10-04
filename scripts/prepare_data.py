@@ -58,7 +58,7 @@ def main() -> None:
         text for text in train_test_leakage if train_labels[text] != test_labels[text]
     }
     if conflicting_labels:
-        message = (
+        message = (  # fmt: skip
             "Conflicting train/test labels for identical text: "
             f"{len(conflicting_labels)} cases"
         )

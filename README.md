@@ -1,18 +1,18 @@
 # Pretrained LLM Adaptation
 
-I built this project to answer a practical question: **how do I take a pretrained language model, adapt it to a real downstream NLP task, and still keep the whole process measurable and reproducible?**
+This project explores a practical question: **how can a pretrained language model be adapted to a real downstream NLP task while keeping the process measurable and reproducible?**
 
 <p align="center">
   <img src="assets/adaptation-cycle.svg" alt="Workflow of my pretrained LLM adaptation process" width="900">
 </p>
 
-> **My focus:** move beyond simply knowing how LLMs work and demonstrate how I engineer, measure, debug, and reproduce an actual model-adaptation workflow.
+> **Focus:** move beyond simply knowing how LLMs work and demonstrate a disciplined, measurable, and reproducible model-adaptation workflow.
 
-## Why I built this
+## Why this project exists
 
-I did not want this repository to be another minimal fine-tuning example where a pretrained model is loaded, a few lines of training code are added, and a final accuracy number is presented without much context.
+This repository is intentionally more than a minimal fine-tuning example where a pretrained model is loaded, a few lines of training code are added, and a final accuracy number is presented without much context.
 
-Instead, I wanted to work through the complete engineering path:
+The focus is the complete engineering path:
 
 ```text
 Problem
@@ -35,39 +35,39 @@ Reproducible evidence
    ↺
 ```
 
-The goal is not just to make a model run. **My goal is to make every important decision traceable to code, configuration, tests, or measured evidence.**
+The goal is not just to make a model run. **Every important decision should be traceable to code, configuration, tests, or measured evidence.**
 
-## The task I chose
+## The task
 
-I use the **BANKING77** intent-classification dataset as the concrete downstream task. It contains 13,083 English customer-service queries across 77 intents, with 10,003 training examples and 3,080 test examples.
+The **BANKING77** intent-classification dataset is used as the concrete downstream task. It contains 13,083 English customer-service queries across 77 intents, with 10,003 training examples and 3,080 test examples.
 
-I chose this problem because it is small enough to experiment with under constrained compute, but rich enough to expose the real issues that matter in NLP adaptation: closely related intents, class imbalance, leakage, model selection, and meaningful error analysis.
+This task is small enough to experiment with under constrained compute, but rich enough to expose the real issues that matter in NLP adaptation: closely related intents, class imbalance, leakage, model selection, and meaningful error analysis.
 
 ## The model and adaptation method
 
-My primary pretrained model is **microsoft/deberta-v3-small**.
+The primary pretrained model is **microsoft/deberta-v3-small**.
 
-I use **LoRA through Hugging Face PEFT** as the main adaptation method. The central question I am exploring is simple:
+**LoRA through Hugging Face PEFT** is the main adaptation method. The central question I am exploring is simple:
 
 > **How much task-specific improvement can I obtain while updating only a small fraction of the pretrained model?**
 
-I explicitly verify the target modules against the instantiated DeBERTa architecture before applying LoRA. For sequence classification, I also preserve and save the classifier and pooler modules so that the adapted model can be reconstructed correctly.
+The implementation verifies the target modules against the instantiated DeBERTa architecture before applying LoRA. For sequence classification, the classifier and pooler modules are preserved and saved so that the adapted model can be reconstructed correctly.
 
-## My baseline ladder
+## Baseline ladder
 
-I use a small baseline ladder so that I can separate different sources of performance rather than treating LoRA as a black box.
+A small baseline ladder helps separate different sources of performance rather than treating LoRA as a black box.
 
 | ID | Method | What I use it for |
 |---|---|---|
-| B0 | Majority class | I use this as the evaluation floor and pipeline sanity check. |
-| B1 | TF-IDF + Logistic Regression | I use this to measure how far a classical lexical approach can go without a Transformer. |
-| B2 | Frozen DeBERTa | I use this to isolate the value of pretrained representations without encoder adaptation. |
+| B0 | Majority class | Evaluation floor and pipeline sanity check. |
+| B1 | TF-IDF + Logistic Regression | Measures how far a classical lexical approach can go without a Transformer. |
+| B2 | Frozen DeBERTa | Isolates the value of pretrained representations without encoder adaptation. |
 | A1 | LoRA | This is my primary parameter-efficient adaptation experiment. |
-| A2 | Full fine-tuning | I keep this as a conditional compute-controlled comparison rather than forcing an irresponsible benchmark. |
+| A2 | Full fine-tuning | Conditional compute-controlled comparison rather than a forced benchmark. |
 
-## What I measure
+## What is measured
 
-I care about more than one headline number.
+The evaluation goes beyond a single headline number.
 
 For model quality, I measure:
 
@@ -86,23 +86,23 @@ Where the runtime allows reliable measurement, I also record:
 - adapter size;
 - inference latency.
 
-For me, the important part is not simply asking **“which model scored higher?”**. I also want to know **why**, where it fails, and what changes when I adapt the model.
+The important questions are not simply **“which model scored higher?”** but also **why**, where it fails, and what changes when the model is adapted.
 
-## How I keep the experiments reproducible
+## Reproducibility
 
-I keep experiments configuration-driven and record the important provenance with every substantive run.
+Experiments are configuration-driven, with important provenance recorded for every substantive run.
 
 That includes the dataset and model revisions, seed, split definition, tokenizer, maximum sequence length, training parameters, and LoRA configuration.
 
-I also treat the public test set as a held-out evaluation set. Rank selection is performed on validation data, and the final selected configuration is then retrained before the final test evaluation.
+The public test set is treated as a held-out evaluation set. Rank selection is performed on validation data, and the final selected configuration is then retrained before the final test evaluation.
 
-Because the project is designed to run on GitHub-hosted CPU runners, the benchmark is intentionally resource-bounded. I am explicit about that limitation rather than presenting a constrained experiment as a full-data or state-of-the-art study.
+Because the project is designed to run on GitHub-hosted CPU runners, the benchmark is intentionally resource-bounded. That limitation is stated explicitly rather than presenting a constrained experiment as a full-data or state-of-the-art study.
 
 Raw datasets and large model weights are not committed to Git.
 
 ## Data engineering
 
-Before training, I validate the dataset rather than assuming the upstream files are already suitable for an experiment.
+Before training, the dataset is validated rather than assuming the upstream files are already suitable for an experiment.
 
 The preparation pipeline checks:
 
@@ -118,7 +118,7 @@ Exact normalized train/test text overlaps are removed from the training pool and
 
 ## LoRA implementation
 
-I keep the LoRA configuration explicit:
+The LoRA configuration is explicit:
 
 ```text
 rank
@@ -130,11 +130,11 @@ modules to save
 
 For DeBERTa, I target the query and value projections and explicitly verify that the expected module names exist before training.
 
-I also calculate trainable versus frozen parameters so that I can quantify what parameter-efficient adaptation actually means for this model.
+Trainable versus frozen parameters are also reported to quantify what parameter-efficient adaptation means for this model.
 
 ## Evaluation and failure handling
 
-I do not want invalid runs to quietly become published results.
+Invalid runs should not quietly become published results.
 
 The evaluation path checks for non-finite logits and probabilities. It also detects prediction collapse in final benchmark evaluations so that a broken or numerically invalid model is not silently treated as successful evidence.
 
@@ -142,7 +142,7 @@ This is intentional: **a failed experiment is useful information during engineer
 
 ## Error analysis
 
-After final evaluation, I inspect the mistakes rather than stopping at aggregate metrics.
+After final evaluation, the mistakes are inspected rather than stopping at aggregate metrics.
 
 The analysis includes:
 
@@ -152,11 +152,11 @@ The analysis includes:
 - high-confidence errors;
 - representative prediction changes between models.
 
-I want the error analysis to tell me what the adaptation actually changed, not just produce another table of numbers.
+The purpose is to show what the adaptation actually changed, not just produce another table of numbers.
 
 ## Inference
 
-I keep a small CLI as the inference surface.
+A small CLI provides the inference surface.
 
 It can load the base model and adapter, classify an input, and expose the resulting intent and confidence. The benchmark also runs an inference smoke test after producing the final adapter artifact.
 
@@ -262,23 +262,23 @@ artifacts/
 examples/
 ```
 
-I keep the repository organized around one narrow lifecycle: **prepare → compare → adapt → evaluate → understand → reproduce**.
+The repository is organized around one narrow lifecycle: **prepare → compare → adapt → evaluate → understand → reproduce**.
 
-## What I intentionally did not build
+## What is intentionally out of scope
 
-I deliberately keep this project focused on pretrained-model adaptation.
+The project stays focused on pretrained-model adaptation.
 
-That means I am **not** adding RAG, agents, vector databases, a frontend, SaaS, Kubernetes, distributed training, or a general MLOps platform just to increase the technology list.
+That means **no** RAG, agents, vector databases, frontend, SaaS, Kubernetes, distributed training, or general MLOps platform merely to increase the technology list.
 
-Those are useful technologies, but they answer different questions. I want this repository to communicate one thing clearly: **I can take a pretrained model and engineer a disciplined adaptation workflow around a concrete problem.**
+Those are useful technologies, but they answer different questions. The repository is intended to communicate one thing clearly: **a pretrained model can be adapted through a disciplined engineering workflow around a concrete problem.**
 
 ## Current status
 
 The implementation, data pipeline, LoRA workflow, evaluation safeguards, CI checks, and benchmark publication pipeline are in place.
 
-For the final release, I deliberately run the benchmark on the current `main` commit before presenting a performance number. This keeps my release claims tied to measurements rather than planned experiments or stale outputs.
+For the final release, the benchmark is run on the current `main` commit before presenting a performance number. This keeps release claims tied to measurements rather than planned experiments or stale outputs.
 
-## My evidence standard
+## Evidence standard
 
 I distinguish between **implementation** and **measurement**.
 
@@ -286,7 +286,7 @@ A planned experiment is not a result.
 
 A metric becomes verified only after the command that produces it completes successfully and the corresponding artifact is retained with its provenance.
 
-That rule is important to me because I want this repository to demonstrate engineering judgment as well as model knowledge.
+This keeps the repository grounded in engineering judgment as well as model knowledge.
 
 ## Scope and limitations
 
@@ -294,7 +294,7 @@ This project studies one English, single-domain intent-classification task using
 
 The benchmark is resource-bounded and therefore should be interpreted as engineering evidence for the adaptation pipeline, not as a claim about the best achievable BANKING77 score.
 
-I also do not claim state-of-the-art performance.
+No state-of-the-art performance claim is made.
 
 ## References
 
@@ -313,6 +313,6 @@ MIT
 
 When a benchmark run is successfully verified, the workflow publishes `docs/BENCHMARK-REPORT.md` together with the measured artifacts under `experiments/`.
 
-I deliberately do not carry stale benchmark outputs forward between runs, and I never replace pending values with external benchmark numbers.
+Stale benchmark outputs are not carried forward between runs, and pending values are never replaced with external benchmark numbers.
 
 Release verification is performed on the current `main` commit before a benchmark result is treated as final evidence.

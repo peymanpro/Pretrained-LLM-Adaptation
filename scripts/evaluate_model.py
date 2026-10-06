@@ -40,7 +40,8 @@ def _predict(
         probabilities = torch.softmax(logits, dim=-1)
         if not torch.isfinite(probabilities).all():
             raise RuntimeError(
-                f"Non-finite probabilities detected during evaluation at batch starting index {start}."
+                "Non-finite probabilities detected during evaluation at "
+                f"batch starting index {start}."
             )
         indices = torch.argmax(probabilities, dim=-1)
         predictions.extend(INTENTS[int(index)] for index in indices)

@@ -19,12 +19,6 @@
 
   <rect width="1200" height="680" rx="28" fill="url(#bg)"/>
 
-  <text x="70" y="72" fill="#f8fafc" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="28" font-weight="700">
-    How I approach pretrained-model adaptation
-  </text>
-  <text x="70" y="105" fill="#a7b0c0" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16">
-    Define → validate → compare → adapt → measure → understand → reproduce → iterate
-  </text>
 
   <path d="M 600,116
            C 820,116 982,232 982,340
@@ -116,7 +110,4 @@
     </text>
   </g>
 
-  <text x="70" y="632" fill="#64748b" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="12">
-    Built with standard SVG primitives for reliable GitHub rendering.
-  </text>
 </svg>

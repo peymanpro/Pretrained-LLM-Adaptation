@@ -169,7 +169,6 @@ def _trainer(
         processing_class=tokenizer,
         data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
         compute_metrics=metrics,
-        head_learning_rate=config.training.head_learning_rate,
     )
 
 

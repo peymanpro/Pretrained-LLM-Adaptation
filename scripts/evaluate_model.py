@@ -33,7 +33,17 @@ def _predict(
         )
         with torch.no_grad():
             logits = model(**encoded).logits
+        if not torch.isfinite(logits).all():
+            raise RuntimeError(
+                "Non-finite logits detected during evaluation at "
+                f"batch starting index {start}."
+            )
         probabilities = torch.softmax(logits, dim=-1)
+        if not torch.isfinite(probabilities).all():
+            raise RuntimeError(
+                "Non-finite probabilities detected during evaluation at "
+                f"batch starting index {start}."
+            )
         indices = torch.argmax(probabilities, dim=-1)
         predictions.extend(INTENTS[int(index)] for index in indices)
         confidences.extend(

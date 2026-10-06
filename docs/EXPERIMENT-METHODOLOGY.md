@@ -71,7 +71,7 @@ Additional evidence:
 - representative prediction changes;
 - inference smoke test.
 
-The evaluation command rejects models whose predictions contain fewer than two distinct intents, preventing a collapsed classifier from being silently accepted as benchmark evidence.
+The evaluation command rejects non-finite logits/probabilities and, outside explicitly diagnostic outputs, rejects models whose predictions contain fewer than two distinct intents, preventing numerically invalid or collapsed classifiers from being silently accepted as benchmark evidence.
 
 ## Error analysis
 

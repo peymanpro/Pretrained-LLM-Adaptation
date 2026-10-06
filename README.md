@@ -46,6 +46,8 @@ Primary metrics are accuracy, macro F1, weighted F1, per-class metrics, and a co
 
 Experiments are configuration-driven. Dataset source revision, model revision, random seed, split rule, tokenizer, sequence length, training parameters, and LoRA settings are recorded with each run.
 
+The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically.
+
 Raw data and large model weights are not committed to Git.
 
 ## Run locally
@@ -87,11 +89,13 @@ Run the LoRA experiment:
 python scripts/train_lora.py --config configs/lora.yaml
 ~~~
 
-Run the rank ablation:
+Run the rank ablation locally:
 
 ~~~bash
 bash scripts/run_rank_ablation.sh
 ~~~
+
+Run the complete portfolio benchmark through GitHub Actions by making a commit whose message contains `[run-experiment]`, or by starting the Benchmark workflow manually.
 
 Evaluate a saved LoRA adapter:
 
@@ -162,3 +166,7 @@ The repository distinguishes implementation from measurement. A planned experime
 ## License
 
 MIT
+
+## Benchmark report
+
+After a successful benchmark run, the repository publishes `docs/BENCHMARK-REPORT.md` and measured artifacts under `experiments/` automatically. Pending values are never replaced with external benchmark numbers.

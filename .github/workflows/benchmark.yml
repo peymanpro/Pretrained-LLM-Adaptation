@@ -6,8 +6,8 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: benchmark-${{ github.workflow }}-${{ github.sha }}
-  cancel-in-progress: false
+  group: benchmark-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   PYTHONUNBUFFERED: "1"
   OMP_NUM_THREADS: "4"

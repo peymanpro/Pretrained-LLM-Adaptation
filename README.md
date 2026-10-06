@@ -46,7 +46,7 @@ Primary metrics are accuracy, macro F1, weighted F1, per-class metrics, and a co
 
 Experiments are configuration-driven. Dataset source revision, model revision, random seed, split rule, tokenizer, sequence length, training parameters, and LoRA settings are recorded with each run.
 
-The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Exact train/test text overlaps from the upstream dataset are excluded from the training pool and recorded in the data manifest. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically. Adaptation runs use separate learning rates for LoRA parameters and the randomly initialized task head (`5e-5` for LoRA/pooler parameters and `2e-4` for the classifier in the current protocol; Adam epsilon is `1e-6` and gradient clipping is `1.0`), with the effective values retained in run metadata.
+The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Exact train/test text overlaps from the upstream dataset are excluded from the training pool and recorded in the data manifest. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically. The current protocol uses standard Trainer/AdamW training at `5e-5`, with FP32-safe settings (`adam_epsilon=1e-6`, gradient clipping at `1.0`) and non-finite prediction guards.
 
 Raw data and large model weights are not committed to Git.
 
@@ -149,6 +149,10 @@ examples/
 ## Scope boundaries
 
 This repository is about LLM adaptation. It intentionally does not introduce RAG, agents, vector databases, frontend/UI, SaaS, Kubernetes, distributed training, or a general MLOps platform.
+
+## Current status
+
+The implementation, data pipeline, LoRA workflow, evaluation safeguards, CI checks, and benchmark publication pipeline are in place. The repository is intentionally not presenting a final performance number until a complete benchmark run produces and publishes verified evidence. This keeps release claims tied to reproducible measurements rather than planned experiments.
 
 ## Evidence standard
 

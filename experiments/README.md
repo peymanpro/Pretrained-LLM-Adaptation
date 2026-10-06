@@ -6,7 +6,7 @@ The benchmark workflow keeps the public test set held out during model selection
 
 Generated benchmark output should be treated as measurement evidence, not source code.
 
-Latest verified pre-benchmark commit: `6789d491c114bcd1d99d852e50df4adc9547cc50` (CI + ML smoke passed with SentencePiece + protobuf tokenizer support).
+Generated benchmark output is deliberately absent from the repository while no current full benchmark has been verified. Historical artifacts from superseded runs are not treated as current evidence.
 
-Benchmark trigger revision: verified CI and ML smoke on commit `3a946ba53f2490eaee072d72bb0f0eef80f139e2`.
+The current `main` branch contains the release-candidate implementation and the benchmark publication workflow.
 

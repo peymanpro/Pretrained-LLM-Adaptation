@@ -2,9 +2,9 @@
 
 ## Status
 
-**Planning / Foundation**
+**Engineering implementation complete — empirical benchmark verification pending.**
 
-No training result or model-performance claim has been established yet.
+The source, data engineering, LoRA adaptation path, evaluation safeguards, inference CLI, CI, and benchmark publication workflow are implemented. No final model-performance claim is made until a complete benchmark run produces verified evidence.
 
 ## Purpose
 
@@ -307,6 +307,6 @@ A file existing is not sufficient evidence of completion.
 
 ## Scope Decision
 
-**Approved planning choice:** BANKING77 intent classification with microsoft/deberta-v3-small, using LoRA as the primary adaptation method and a classical + frozen-representation baseline ladder.
+**Current implementation choice:** BANKING77 intent classification with microsoft/deberta-v3-small, using LoRA as the primary adaptation method and a classical + frozen-representation baseline ladder.
 
-This is a planning decision. Actual feasibility and performance remain to be measured.
+The implementation is complete enough for empirical verification. Final feasibility/performance claims remain gated on the complete benchmark evidence.

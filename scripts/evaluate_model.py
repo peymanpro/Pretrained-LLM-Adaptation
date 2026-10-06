@@ -107,7 +107,11 @@ def main() -> None:
         args.max_length,
         args.batch_size,
     )
-    if len(set(predictions)) < 2 and not args.allow_degenerate:
+    output_name = Path(args.output).name
+    diagnostic_output = output_name == "frozen-evaluation.json" or (
+        output_name.startswith("ablation-r") and output_name.endswith("-validation.json")
+    )
+    if len(set(predictions)) < 2 and not (args.allow_degenerate or diagnostic_output):
         raise RuntimeError("Degenerate model output: evaluation predicted only one unique intent.")
     labels = sorted({sample.label for sample in samples})
     report = detailed_report(

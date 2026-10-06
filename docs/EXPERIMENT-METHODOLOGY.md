@@ -2,93 +2,199 @@
 
 ## Benchmark protocol
 
-The final portfolio benchmark is resource-bounded so that the complete pipeline can execute reliably on GitHub-hosted CPU runners.
+The portfolio benchmark is deliberately resource-bounded so that the complete workflow can run on GitHub-hosted CPU runners.
 
-The protocol uses the full public BANKING77 test split for final evaluation while limiting training runs to deterministic stratified subsets recorded in the configuration and run metadata. Any exact normalized text overlap between the upstream train and test files is removed from the training pool, and repeated normalized texts within the training pool are collapsed deterministically before the validation split.
+The benchmark uses the full public BANKING77 test split for the final held-out evaluation. Training and rank-selection runs use deterministic stratified subsets defined by the CI benchmark configurations.
 
-Training allocation:
-- frozen baseline: 600 training examples and 200 validation examples for 2 epochs;
-- LoRA rank selection: 600 training examples and 200 validation examples for each of r=4, r=8, and r=16 for 3 epochs;
-- final LoRA run: 1,200 training examples and 300 validation examples for 3 epochs;
-- final test metrics: full BANKING77 public test split.
+Before splitting, the preparation pipeline:
 
-The benchmark uses the standard Trainer/AdamW optimizer with a uniform 5e-5 learning rate for all trainable parameters. This matches the official DeBERTa-v3-small fine-tuning example closely (4.5e-5, 3 epochs) and avoids introducing an unvalidated optimizer scheme into the final portfolio benchmark. The sequence length is capped at 48; inspection of the prepared pinned split showed that this retains more than 99% of examples without truncation while reducing CPU work. This remains a resource-bounded engineering benchmark rather than a full-data training study.
+1. validates the BANKING77 schema and 77-intent label set;
+2. checks for empty or malformed samples;
+3. checks exact normalized text overlap between the official train and test files;
+4. removes overlapping training texts from the training pool;
+5. removes repeated normalized training texts deterministically;
+6. creates a deterministic stratified fit/validation split using seed 42.
 
-This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.
+### Benchmark allocations
 
-Optimization provenance: the selected 5e-5 rate and 3-epoch schedule are consistent with the official DeBERTa-v3-small fine-tuning example, which uses a 4.5e-5 learning rate for three epochs.
+The GitHub Actions benchmark currently uses these configurations:
 
-## Data
+| Stage | Configuration | Train cap | Validation cap | Epochs | Max length |
+|---|---|---:|---:|---:|---:|
+| Frozen DeBERTa | `configs/ci-frozen.yaml` | 600 | 200 | 2 | 48 |
+| LoRA rank 4 | `configs/ci-r4.yaml` | 3,000 | 1,000 | 1 | 48 |
+| LoRA rank 8 | `configs/ci-r8.yaml` | 3,000 | 1,000 | 1 | 48 |
+| LoRA rank 16 | `configs/ci-r16.yaml` | 3,000 | 1,000 | 1 | 48 |
+| Final LoRA | `configs/ci-final.yaml` | 1,200 | 300 | 3 | 48 |
+| Final evaluation | — | — | — | — | 48 |
 
-PolyAI BANKING77 is downloaded from the pinned upstream revision in configuration. The preparation pipeline validates schema, labels, empty text, duplicates, and train/test leakage, then creates deterministic stratified fit/validation splits.
+The final evaluation uses the complete 3,080-example public BANKING77 test split.
 
-The public test set is never used for rank selection.
+The rank-ablation configurations use:
+
+- learning rate: `5e-5`;
+- per-device training batch size: 32;
+- per-device evaluation batch size: 64;
+- weight decay: `0.01`;
+- warmup ratio: `0.1`;
+- Adam epsilon: `1e-6`;
+- gradient clipping: `1.0`;
+- fp16: disabled;
+- bf16: disabled;
+- seed: 42.
+
+The final LoRA configuration uses the same optimization settings and retrains the selected rank on its larger final training allocation.
+
+This is a resource-bounded engineering benchmark, not a full-data training study and not a state-of-the-art benchmark.
+
+## Dataset
+
+The task is 77-class intent classification using PolyAI BANKING77.
+
+The source data are downloaded from a pinned revision of the upstream dataset repository. Raw files are intentionally not committed to Git.
+
+The public test set is kept out of rank selection and other model-selection decisions.
 
 ## Baselines
 
-1. Majority-class floor.
-2. TF-IDF plus logistic regression.
-3. Frozen DeBERTa representation baseline.
+The benchmark contains:
+
+1. majority-class floor;
+2. TF-IDF plus logistic regression;
+3. frozen DeBERTa-v3-small with a trainable task head;
 4. LoRA adaptation of DeBERTa-v3-small.
 
-Full fine-tuning remains conditional because this benchmark is explicitly CPU-bounded.
+Full fine-tuning remains conditional on whether a controlled comparison is feasible under the available compute.
 
 ## Model
 
-Primary model: microsoft/deberta-v3-small
+Primary model:
 
-The exact Hugging Face revision is pinned in benchmark configuration.
+`microsoft/deberta-v3-small`
+
+The benchmark pins the Hugging Face model revision:
+
+`a59be8aa63396e73dbb45a1487e4cde4be98bfa4`
 
 ## LoRA
 
-The benchmark uses PEFT LoRA with query/value projections and explicitly saved classifier/pooler modules.
+The benchmark applies PEFT LoRA to the DeBERTa query and value projections:
 
-Target names are verified against the instantiated DeBERTa architecture before training.
+```text
+query_proj
+value_proj
+```
+
+The sequence-classification modules are explicitly saved:
+
+```text
+classifier
+pooler
+```
+
+The implementation verifies the expected module names against the instantiated model before applying LoRA.
+
+The rank ablation evaluates:
+
+```text
+r = 4
+r = 8
+r = 16
+```
 
 ## Rank selection
 
-Validation macro F1 is the selection metric. The public test set is excluded from this decision.
+Validation macro F1 is the rank-selection metric.
 
-Ranks evaluated:
-- r=4;
-- r=8;
-- r=16.
+The public test set is excluded from this decision.
 
-The final selected rank is retrained on the larger final training allocation and then evaluated once on the held-out test split.
+After the three rank experiments finish, `scripts/select_rank.py` selects the best rank by validation macro F1, using accuracy only as a secondary tie-breaker.
+
+The selected rank is then retrained with `configs/ci-final.yaml` and evaluated once on the full public test split.
 
 ## Evaluation
 
 Primary metrics:
+
 - accuracy;
 - macro F1;
 - weighted F1;
-- per-class metrics;
+- per-class precision, recall, and F1;
 - confusion matrix.
 
-Additional evidence:
-- trainable parameter count;
-- trainable percentage;
+Additional evidence includes:
+
+- total and trainable parameter counts;
+- trainable-parameter percentage;
 - training runtime;
-- error distribution;
-- representative prediction changes;
+- prediction distribution;
+- error-analysis outputs;
+- prediction changes between frozen and final models;
 - inference smoke test.
 
-The evaluation command rejects non-finite logits/probabilities and, outside explicitly diagnostic outputs, rejects models whose predictions contain fewer than two distinct intents, preventing numerically invalid or collapsed classifiers from being silently accepted as benchmark evidence.
+The evaluation path rejects non-finite logits and probabilities.
+
+For final benchmark evidence, a classifier whose predictions collapse to fewer than two unique intents is rejected. The benchmark integrity gate is stricter and requires at least five distinct predicted intents in the final evaluation artifact.
 
 ## Error analysis
 
-The final test predictions are analyzed for highest-frequency confusion pairs, error counts by gold intent, error counts by input-length bucket, and high-confidence errors.
+The final test predictions are analyzed for:
+
+- total error count and error rate;
+- errors by gold intent;
+- errors by input-length bucket;
+- most frequent gold/predicted confusion pairs;
+- high-confidence errors.
+
+The prediction-comparison step also checks row alignment and records examples whose predictions changed between the frozen baseline and final adapted model.
+
+## Benchmark publication and integrity
+
+The GitHub Actions benchmark proceeds through:
+
+```text
+prepare
+→ classical baselines
+→ frozen baseline
+→ LoRA rank ablation
+→ validation rank selection
+→ final LoRA training
+→ full test evaluation
+→ error analysis
+→ prediction comparison
+→ result compilation
+→ benchmark report
+→ integrity verification
+→ inference smoke test
+→ artifact publication
+```
+
+The final integrity gate verifies, among other things:
+
+- selected rank matches the final training configuration;
+- final evaluation contains enough examples;
+- final prediction diversity is sufficient;
+- reported metrics are within valid ranges;
+- required baseline rows exist;
+- adapter and tokenizer artifacts exist.
+
+The publication workflow copies only artifacts produced by the verified benchmark run into the repository.
+
+## Reproducibility rule
+
+A result is accepted only when:
+
+1. the producing workflow step completes successfully;
+2. the generated artifact exists;
+3. model, dataset, environment, and training configuration are retained;
+4. the public test split was not used for model selection.
+
+External benchmark numbers are not substituted for missing measurements.
 
 ## Limitations
 
-The resource-bounded training allocation limits statistical power and may understate or distort performance relative to full-data training. Results should therefore be interpreted as engineering evidence for the adaptation pipeline, not as a claim about the best achievable BANKING77 score.
+The benchmark uses constrained training allocations to make the complete workflow feasible on CPU runners. Results may therefore differ from a full-data or differently tuned training regime.
 
-The project does not claim state-of-the-art performance.
+The project studies one English, single-domain classification problem with an encoder-style pretrained model. Conclusions do not automatically generalize to multilingual, multi-domain, generative, or large-scale language-model adaptation.
 
-## Evidence rule
-
-A result is accepted only when:
-1. the producing workflow step completes successfully;
-2. the generated artifact exists;
-3. the configuration/model/data provenance is recorded;
-4. the test split was not used for model selection.
+The project makes no state-of-the-art or production-readiness claim.

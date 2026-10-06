@@ -1,0 +1,33 @@
+{
+  "selection": null,
+  "experiments": [
+    {
+      "experiment": "B0 Majority",
+      "accuracy": 0.012987012987012988,
+      "macro_f1": 0.000333000333000333,
+      "weighted_f1": 0.00033300033300033295
+    },
+    {
+      "experiment": "B1 TF-IDF + LR",
+      "accuracy": 0.8467532467532467,
+      "macro_f1": 0.8448869570139127,
+      "weighted_f1": 0.8448869570139128
+    },
+    {
+      "experiment": "B2 Frozen DeBERTa",
+      "accuracy": 0.012987012987012988,
+      "macro_f1": 0.000333000333000333,
+      "weighted_f1": 0.00033300033300033295
+    },
+    {
+      "experiment": "A1 Final LoRA r=8",
+      "accuracy": 0.012987012987012988,
+      "macro_f1": 0.00033332083380206576,
+      "weighted_f1": 0.00033332083380206576,
+      "trainable_parameters": 797261,
+      "trainable_percentage": 0.5584961535855071,
+      "training_runtime_seconds": 3671.9411
+    }
+  ],
+  "evidence_rule": "Only artifacts produced by this repository's benchmark workflow are included."
+}

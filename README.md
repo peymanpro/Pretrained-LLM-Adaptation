@@ -276,7 +276,7 @@ Those are useful technologies, but they answer different questions. I want this 
 
 The implementation, data pipeline, LoRA workflow, evaluation safeguards, CI checks, and benchmark publication pipeline are in place.
 
-I am deliberately not presenting a final performance number until the current benchmark run produces verified evidence on the current `main` commit. This keeps my release claims tied to measurements rather than planned experiments or stale outputs.
+For the final release, I deliberately run the benchmark on the current `main` commit before presenting a performance number. This keeps my release claims tied to measurements rather than planned experiments or stale outputs.
 
 ## My evidence standard
 

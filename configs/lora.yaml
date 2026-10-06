@@ -24,6 +24,7 @@ lora:
 
 training:
   learning_rate: 0.0002
+  head_learning_rate: 0.0005
   per_device_train_batch_size: 16
   per_device_eval_batch_size: 32
   gradient_accumulation_steps: 1

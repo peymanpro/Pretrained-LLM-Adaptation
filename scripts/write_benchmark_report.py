@@ -34,7 +34,8 @@ def main() -> None:
         "",
         "## Protocol",
         "",
-        (\n            "Resource-bounded benchmark; rank selection uses validation only; final "
+        (
+            "Resource-bounded benchmark; rank selection uses validation only; final "
             "metrics use the full public BANKING77 test split."
         ),
         "",
@@ -86,7 +87,8 @@ def main() -> None:
         "",
         "## Interpretation",
         "",
-        (\n            "This benchmark is evidence of a reproducible adaptation pipeline, not "
+        (
+            "This benchmark is evidence of a reproducible adaptation pipeline, not "
             "a state-of-the-art claim. Training is deliberately resource-bounded."
         ),
         "",

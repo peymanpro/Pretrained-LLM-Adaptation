@@ -194,6 +194,19 @@ def exclude_overlaps(samples: list[Sample], other: list[Sample]) -> list[Sample]
     return [sample for sample in samples if sample.text.strip().casefold() not in other_keys]
 
 
+def deduplicate_samples(samples: list[Sample]) -> list[Sample]:
+    """Keep the first sample for each normalized text, preserving source order."""
+    seen: set[str] = set()
+    unique: list[Sample] = []
+    for sample in samples:
+        key = sample.text.strip().casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(sample)
+    return unique
+
+
 def split_train_validation(
     samples: list[Sample],
     validation_fraction: float,
@@ -222,12 +235,14 @@ def write_manifest(
     fit_validation_overlap_count: int = 0,
     source_train_count: int | None = None,
     removed_train_test_overlap_count: int = 0,
+    removed_within_train_duplicate_count: int = 0,
 ) -> None:
     payload = {
         "dataset": "PolyAI/banking77",
         "source_revision": source_revision,
         "source_train_count": source_train_count,
         "removed_train_test_overlap_count": removed_train_test_overlap_count,
+        "removed_within_train_duplicate_count": removed_within_train_duplicate_count,
         "counts": {split: len(items) for split, items in samples.items()},
         "label_counts": {
             split: {label: sum(sample.label == label for sample in items) for label in INTENTS}

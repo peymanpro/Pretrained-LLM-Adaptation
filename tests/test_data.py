@@ -3,6 +3,7 @@ from pathlib import Path
 from pretrained_llm_adaptation.data import (
     INTENTS,
     Sample,
+    deduplicate_samples,
     duplicate_texts,
     exclude_overlaps,
     leakage,
@@ -35,6 +36,14 @@ def test_invalid_samples_are_reported() -> None:
     )
     assert any("empty text" in error for error in errors)
     assert any("unknown label" in error for error in errors)
+
+
+def test_deduplicate_samples_preserves_first_occurrence() -> None:
+    samples = [Sample("Hello", "age_limit"), Sample(" hello ", "age_limit"), Sample("Keep", "card_arrival")]
+    assert deduplicate_samples(samples) == [
+        Sample("Hello", "age_limit"),
+        Sample("Keep", "card_arrival"),
+    ]
 
 
 def test_exclude_overlaps_removes_normalized_matches() -> None:

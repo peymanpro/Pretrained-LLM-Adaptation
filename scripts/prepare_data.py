@@ -9,6 +9,7 @@ from pretrained_llm_adaptation.config import load_config
 from pretrained_llm_adaptation.data import (
     INTENTS,
     Sample,
+    deduplicate_samples,
     duplicate_texts,
     exclude_overlaps,
     leakage,
@@ -75,8 +76,14 @@ def main() -> None:
         raise ValueError("all training samples were removed by train/test overlap filtering")
 
     duplicates = duplicate_texts(train)
+    duplicate_count = len(train) - len(deduplicate_samples(train))
     if duplicates:
-        print(f"warning: {len(duplicates)} duplicated training texts detected")
+        print(
+            "info: "
+            f"{len(duplicates)} duplicated training texts detected; "
+            f"removing {duplicate_count} duplicate rows"
+        )
+    train = deduplicate_samples(train)
 
     fit, validation = split_train_validation(
         train,
@@ -101,7 +108,8 @@ def main() -> None:
         train_test_overlap_count=len(train_test_leakage),
         fit_validation_overlap_count=len(fit_validation_leakage),
         source_train_count=source_train_count,
-        removed_train_test_overlap_count=source_train_count - len(train),
+        removed_train_test_overlap_count=len(train_test_leakage),
+        removed_within_train_duplicate_count=duplicate_count,
     )
     print(
         "counts:",

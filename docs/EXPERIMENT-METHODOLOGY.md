@@ -4,7 +4,7 @@
 
 The final portfolio benchmark is resource-bounded so that the complete pipeline can execute reliably on GitHub-hosted CPU runners.
 
-The protocol uses the full public BANKING77 test split for final evaluation while limiting training runs to deterministic stratified subsets recorded in the configuration and run metadata. Any exact normalized text overlap between the upstream train and test files is removed from the training pool before the validation split.
+The protocol uses the full public BANKING77 test split for final evaluation while limiting training runs to deterministic stratified subsets recorded in the configuration and run metadata. Any exact normalized text overlap between the upstream train and test files is removed from the training pool, and repeated normalized texts within the training pool are collapsed deterministically before the validation split.
 
 Training allocation:
 - frozen baseline: 600 training examples and 200 validation examples;

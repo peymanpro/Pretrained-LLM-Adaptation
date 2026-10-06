@@ -204,13 +204,18 @@ jobs:
           required_files = [
               "adapter_model.safetensors",
               "adapter_config.json",
-              "tokenizer.json",
               "tokenizer_config.json",
               "run_metadata.json",
           ]
           missing = [name for name in required_files if not (run_dir / name).exists()]
           if missing:
               raise SystemExit("final adapter evidence missing: " + ", ".join(missing))
+
+          tokenizer_candidates = ("tokenizer.json", "spm.model")
+          if not any((run_dir / name).exists() for name in tokenizer_candidates):
+              raise SystemExit(
+                  "final tokenizer evidence missing: expected tokenizer.json or spm.model"
+              )
 
           print(json.dumps({
               "status": "verified",
@@ -234,6 +239,7 @@ jobs:
             artifacts/runs/selected-r*-final/adapter_model.safetensors
             artifacts/runs/selected-r*-final/adapter_config.json
             artifacts/runs/selected-r*-final/tokenizer.json
+            artifacts/runs/selected-r*-final/spm.model
             artifacts/runs/selected-r*-final/tokenizer_config.json
             artifacts/runs/selected-r*-final/run_metadata.json
 

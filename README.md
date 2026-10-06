@@ -46,7 +46,7 @@ Primary metrics are accuracy, macro F1, weighted F1, per-class metrics, and a co
 
 Experiments are configuration-driven. Dataset source revision, model revision, random seed, split rule, tokenizer, sequence length, training parameters, and LoRA settings are recorded with each run.
 
-The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Exact train/test text overlaps from the upstream dataset are excluded from the training pool and recorded in the data manifest. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically. Adaptation runs use separate learning rates for LoRA parameters and the randomly initialized task head, with the effective values retained in run metadata.
+The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Exact train/test text overlaps from the upstream dataset are excluded from the training pool and recorded in the data manifest. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically. Adaptation runs use separate learning rates for LoRA parameters and the randomly initialized task head (`5e-5` for LoRA parameters and `1e-4` for the task head in the final protocol), with the effective values retained in run metadata.
 
 Raw data and large model weights are not committed to Git.
 

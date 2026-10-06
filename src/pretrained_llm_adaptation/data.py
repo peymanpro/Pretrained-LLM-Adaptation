@@ -188,6 +188,12 @@ def leakage(train: list[Sample], other: list[Sample]) -> set[str]:
     return train_keys.intersection(sample.text.strip().casefold() for sample in other)
 
 
+def exclude_overlaps(samples: list[Sample], other: list[Sample]) -> list[Sample]:
+    """Remove samples whose normalized text occurs in another split."""
+    other_keys = {sample.text.strip().casefold() for sample in other}
+    return [sample for sample in samples if sample.text.strip().casefold() not in other_keys]
+
+
 def split_train_validation(
     samples: list[Sample],
     validation_fraction: float,
@@ -214,10 +220,14 @@ def write_manifest(
     seed: int,
     train_test_overlap_count: int = 0,
     fit_validation_overlap_count: int = 0,
+    source_train_count: int | None = None,
+    removed_train_test_overlap_count: int = 0,
 ) -> None:
     payload = {
         "dataset": "PolyAI/banking77",
         "source_revision": source_revision,
+        "source_train_count": source_train_count,
+        "removed_train_test_overlap_count": removed_train_test_overlap_count,
         "counts": {split: len(items) for split, items in samples.items()},
         "label_counts": {
             split: {label: sum(sample.label == label for sample in items) for label in INTENTS}

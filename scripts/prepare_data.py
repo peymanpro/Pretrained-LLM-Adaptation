@@ -10,6 +10,7 @@ from pretrained_llm_adaptation.data import (
     INTENTS,
     Sample,
     duplicate_texts,
+    exclude_overlaps,
     leakage,
     read_categories,
     read_csv,
@@ -63,9 +64,15 @@ def main() -> None:
         raise ValueError(message)
     if train_test_leakage:
         print(
-            "warning: official BANKING77 split contains "
-            f"{len(train_test_leakage)} exact train/test text overlaps"
+            "info: official BANKING77 split contains "
+            f"{len(train_test_leakage)} exact train/test text overlaps; "
+            "excluding those texts from the training pool"
         )
+
+    source_train_count = len(train)
+    train = exclude_overlaps(train, test)
+    if not train:
+        raise ValueError("all training samples were removed by train/test overlap filtering")
 
     duplicates = duplicate_texts(train)
     if duplicates:
@@ -93,6 +100,8 @@ def main() -> None:
         config.dataset.seed,
         train_test_overlap_count=len(train_test_leakage),
         fit_validation_overlap_count=len(fit_validation_leakage),
+        source_train_count=source_train_count,
+        removed_train_test_overlap_count=source_train_count - len(train),
     )
     print(
         "counts:",

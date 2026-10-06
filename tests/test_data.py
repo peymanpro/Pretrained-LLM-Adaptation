@@ -4,6 +4,7 @@ from pretrained_llm_adaptation.data import (
     INTENTS,
     Sample,
     duplicate_texts,
+    exclude_overlaps,
     leakage,
     read_categories,
     split_train_validation,
@@ -34,6 +35,12 @@ def test_invalid_samples_are_reported() -> None:
     )
     assert any("empty text" in error for error in errors)
     assert any("unknown label" in error for error in errors)
+
+
+def test_exclude_overlaps_removes_normalized_matches() -> None:
+    train = [Sample("Hello", "age_limit"), Sample("Keep", "card_arrival")]
+    test = [Sample(" hello ", "age_limit")]
+    assert exclude_overlaps(train, test) == [Sample("Keep", "card_arrival")]
 
 
 def test_leakage_is_case_insensitive() -> None:

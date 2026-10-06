@@ -9,7 +9,7 @@ A reproducible study of adapting a pretrained language model to a concrete downs
 ~~~text
 BANKING77
    ↓
-Data validation + leakage checks
+Data validation + leakage removal checks
    ↓
 Classical baselines
    ↓
@@ -46,7 +46,7 @@ Primary metrics are accuracy, macro F1, weighted F1, per-class metrics, and a co
 
 Experiments are configuration-driven. Dataset source revision, model revision, random seed, split rule, tokenizer, sequence length, training parameters, and LoRA settings are recorded with each run.
 
-The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically.
+The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Exact train/test text overlaps from the upstream dataset are excluded from the training pool and recorded in the data manifest. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically.
 
 Raw data and large model weights are not committed to Git.
 

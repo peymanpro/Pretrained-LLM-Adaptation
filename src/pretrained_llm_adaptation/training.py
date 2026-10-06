@@ -56,6 +56,20 @@ def _tokenize(tokenizer: Any, samples: list[Sample], max_length: int) -> Any:
     )
 
 
+def _is_head_parameter(name: str) -> bool:
+    lowered = name.lower()
+    return "classifier" in lowered or "pooler" in lowered
+
+
+def _is_no_decay_parameter(name: str) -> bool:
+    lowered = name.lower()
+    return (
+        lowered.endswith(".bias")
+        or "layernorm.weight" in lowered
+        or "layer_norm.weight" in lowered
+    )
+
+
 def _trainer(
     model: Any,
     tokenizer: Any,
@@ -68,6 +82,54 @@ def _trainer(
         from transformers import DataCollatorWithPadding, Trainer, TrainingArguments
     except ImportError as exc:
         raise RuntimeError("Transformers is required for training.") from exc
+
+    class AdaptationTrainer(Trainer):
+        def create_optimizer(self, model: Any = None) -> Any:
+            if self.optimizer is not None:
+                return self.optimizer
+            import torch
+
+            active_model = model or self.model
+            head_lr = config.training.head_learning_rate
+            parameter_groups: dict[tuple[str, float], dict[str, Any]] = {}
+
+            for name, parameter in active_model.named_parameters():
+                if not parameter.requires_grad:
+                    continue
+
+                kind = (
+                    "head"
+                    if head_lr is not None and _is_head_parameter(name)
+                    else "adaptation"
+                )
+                lr = (
+                    head_lr
+                    if kind == "head" and head_lr is not None
+                    else self.args.learning_rate
+                )
+                weight_decay = (
+                    0.0 if _is_no_decay_parameter(name) else self.args.weight_decay
+                )
+                key = (kind, weight_decay)
+
+                if key not in parameter_groups:
+                    parameter_groups[key] = {
+                        "params": [],
+                        "lr": lr,
+                        "weight_decay": weight_decay,
+                    }
+                parameter_groups[key]["params"].append(parameter)
+
+            if not parameter_groups:
+                raise ValueError("No trainable parameters were found.")
+
+            self.optimizer = torch.optim.AdamW(
+                list(parameter_groups.values()),
+                lr=self.args.learning_rate,
+                betas=(self.args.adam_beta1, self.args.adam_beta2),
+                eps=self.args.adam_epsilon,
+            )
+            return self.optimizer
 
     training_args = TrainingArguments(
         output_dir=str(output_dir),
@@ -91,6 +153,9 @@ def _trainer(
         fp16=config.training.fp16,
         bf16=config.training.bf16,
         load_best_model_at_end=config.training.load_best_model_at_end,
+        metric_for_best_model="macro_f1",
+        greater_is_better=True,
+        optim="adamw_torch",
         adam_epsilon=1e-6,
         max_grad_norm=1.0,
         report_to=[],
@@ -111,7 +176,7 @@ def _trainer(
             "weighted_f1": scores.weighted_f1,
         }
 
-    return Trainer(
+    return AdaptationTrainer(
         model=model,
         args=training_args,
         train_dataset=train_ds,
@@ -177,6 +242,10 @@ def _write_metadata(
         "train_samples": train_size,
         "validation_samples": validation_size,
         "training_result": training_result,
+        "effective_learning_rates": {
+            "adaptation": config.training.learning_rate,
+            "head": config.training.head_learning_rate,
+        },
         "environment": _environment_metadata(),
     }
     output_dir.mkdir(parents=True, exist_ok=True)

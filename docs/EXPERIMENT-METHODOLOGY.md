@@ -12,7 +12,7 @@ Training allocation:
 - final LoRA run: 1,200 training examples and 300 validation examples for 3 epochs;
 - final test metrics: full BANKING77 public test split.
 
-The benchmark uses 5e-5 for LoRA parameters and the DeBERTa pooler, plus 2e-4 for the classification layer. A pilot that applied 1e-4 to the whole task head produced NaN gradients/loss, so the higher rate is restricted to the small randomly initialized classifier while the pooler remains at the conservative adaptation rate. The effective learning rates are recorded in run metadata. The sequence length is capped at 48; inspection of the prepared pinned split showed that this retains more than 99% of examples without truncation while reducing CPU work. This remains a resource-bounded engineering benchmark rather than a full-data training study.
+The benchmark uses the standard Trainer/AdamW optimizer with a uniform 5e-5 learning rate for all trainable parameters. This matches the official DeBERTa-v3-small fine-tuning example closely (4.5e-5, 3 epochs) and avoids introducing an unvalidated optimizer scheme into the final portfolio benchmark. The sequence length is capped at 48; inspection of the prepared pinned split showed that this retains more than 99% of examples without truncation while reducing CPU work. This remains a resource-bounded engineering benchmark rather than a full-data training study.
 
 This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.
 

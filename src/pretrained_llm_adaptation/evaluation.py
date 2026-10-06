@@ -52,6 +52,10 @@ def detailed_report(
             labels=list(labels),
         ).tolist(),
         "labels": list(labels),
+        "prediction_summary": {
+            "unique_labels": len(set(y_pred)),
+            "labels": sorted(set(y_pred)),
+        },
     }
 
 

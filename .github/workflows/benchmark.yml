@@ -48,10 +48,7 @@ jobs:
         with: { python-version: "3.12" }
       - run: python -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cpu
       - run: |
-          python -m pip install --upgrade \
-            "transformers>=5,<6" "peft>=0.20,<1" "protobuf>=5,<7" \
-            "datasets>=4,<5" "accelerate>=1.8,<2" "pyyaml>=6,<7" \
-            "sentencepiece>=0.2,<1" "scikit-learn>=1.7,<2"
+          python -m pip install --upgrade             "transformers>=5,<6" "peft>=0.20,<1" "protobuf>=5,<7"             "datasets>=4,<5" "accelerate>=1.8,<2" "pyyaml>=6,<7"             "sentencepiece>=0.2,<1" "scikit-learn>=1.7,<2"
       - uses: actions/download-artifact@v4
         with: { name: benchmark-inputs }
       - name: Train frozen baseline
@@ -60,10 +57,7 @@ jobs:
       - name: Evaluate frozen baseline
         env: { PYTHONPATH: src }
         run: |
-          python scripts/evaluate_model.py \
-            --model-dir artifacts/runs/frozen-deberta \
-            --data data/processed/banking77/test.jsonl \
-            --output experiments/frozen-evaluation.json
+          python scripts/evaluate_model.py             --model-dir artifacts/runs/frozen-deberta             --data data/processed/banking77/test.jsonl             --output experiments/frozen-evaluation.json
       - uses: actions/upload-artifact@v4
         with:
           name: frozen-evidence
@@ -78,17 +72,14 @@ jobs:
       fail-fast: false
       matrix: { rank: [4, 8, 16] }
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: python -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cpu
       - run: |
-          python -m pip install --upgrade \
-            "transformers>=5,<6" "peft>=0.20,<1" "protobuf>=5,<7" \
-            "datasets>=4,<5" "accelerate>=1.8,<2" "pyyaml>=6,<7" \
-            "sentencepiece>=0.2,<1" "scikit-learn>=1.7,<2"
+          python -m pip install --upgrade             "transformers>=5,<6" "peft>=0.20,<1" "protobuf>=5,<7"             "datasets>=4,<5" "accelerate>=1.8,<2" "pyyaml>=6,<7"             "sentencepiece>=0.2,<1" "scikit-learn>=1.7,<2"
       - uses: actions/download-artifact@v4
         with: { name: benchmark-inputs }
       - name: Train LoRA rank
@@ -97,11 +88,7 @@ jobs:
       - name: Validate on validation split
         env: { PYTHONPATH: src }
         run: |
-          python scripts/evaluate_model.py \
-            --model-dir artifacts/runs/ablation-r${{ matrix.rank }} \
-            --adapter \
-            --data data/processed/banking77/validation.jsonl \
-            --output experiments/ablation-r${{ matrix.rank }}-validation.json
+          python scripts/evaluate_model.py             --model-dir artifacts/runs/ablation-r${{ matrix.rank }}             --adapter             --data data/processed/banking77/validation.jsonl             --output experiments/ablation-r${{ matrix.rank }}-validation.json
       - uses: actions/upload-artifact@v4
         with:
           name: rank-${{ matrix.rank }}-evidence
@@ -124,16 +111,12 @@ jobs:
       - name: Select rank using validation macro F1
         env: { PYTHONPATH: src }
         run: |
-          python scripts/select_rank.py \
-            --reports \
-            evidence/experiments/ablation-r4-validation.json \
-            evidence/experiments/ablation-r8-validation.json \
-            evidence/experiments/ablation-r16-validation.json \
-            --output selected-rank.json
+          mkdir -p experiments
+          python scripts/select_rank.py             --reports             evidence/experiments/ablation-r4-validation.json             evidence/experiments/ablation-r8-validation.json             evidence/experiments/ablation-r16-validation.json             --output experiments/selected-rank.json
       - uses: actions/upload-artifact@v4
         with:
           name: selected-rank
-          path: selected-rank.json
+          path: experiments/selected-rank.json
 
   final:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]')
@@ -146,10 +129,7 @@ jobs:
         with: { python-version: "3.12" }
       - run: python -m pip install --upgrade torch --index-url https://download.pytorch.org/whl/cpu
       - run: |
-          python -m pip install --upgrade \
-            "transformers>=5,<6" "peft>=0.20,<1" "protobuf>=5,<7" \
-            "datasets>=4,<5" "accelerate>=1.8,<2" "pyyaml>=6,<7" \
-            "sentencepiece>=0.2,<1" "scikit-learn>=1.7,<2"
+          python -m pip install --upgrade             "transformers>=5,<6" "peft>=0.20,<1" "protobuf>=5,<7"             "datasets>=4,<5" "accelerate>=1.8,<2" "pyyaml>=6,<7"             "sentencepiece>=0.2,<1" "scikit-learn>=1.7,<2"
       - uses: actions/download-artifact@v4
         with: { name: benchmark-inputs }
       - uses: actions/download-artifact@v4
@@ -159,54 +139,36 @@ jobs:
       - name: Resolve selected rank
         id: rank
         shell: bash
-        run: echo "rank=$(python -c 'import json; print(json.load(open("selected-rank/selected-rank.json"))["selected"]["rank"])')" >> "$GITHUB_OUTPUT"
+        run: echo "rank=$(python -c 'import json; print(json.load(open("selected-rank/experiments/selected-rank.json"))["selected"]["rank"])')" >> "$GITHUB_OUTPUT"
       - run: cp frozen-evidence/experiments/frozen-evaluation.json experiments/frozen-evaluation.json
+      - run: cp selected-rank/experiments/selected-rank.json experiments/selected-rank.json
       - name: Train final LoRA
         env: { PYTHONPATH: src }
         run: |
-          python scripts/train_lora.py \
-            --config configs/ci-final.yaml \
-            --epochs 1 \
-            --experiment-name selected-r${{ steps.rank.outputs.rank }}-final
+          python scripts/train_lora.py             --config configs/ci-final.yaml             --experiment-name selected-r${{ steps.rank.outputs.rank }}-final
       - name: Evaluate final model on full test
         env: { PYTHONPATH: src }
         run: |
-          python scripts/evaluate_model.py \
-            --model-dir artifacts/runs/selected-r${{ steps.rank.outputs.rank }}-final \
-            --adapter \
-            --data data/processed/banking77/test.jsonl \
-            --output experiments/selected-r${{ steps.rank.outputs.rank }}-final-evaluation.json
+          python scripts/evaluate_model.py             --model-dir artifacts/runs/selected-r${{ steps.rank.outputs.rank }}-final             --adapter             --data data/processed/banking77/test.jsonl             --output experiments/selected-r${{ steps.rank.outputs.rank }}-final-evaluation.json
       - name: Analyze errors
         env: { PYTHONPATH: src }
         run: |
-          python scripts/analyze_errors.py \
-            experiments/selected-r${{ steps.rank.outputs.rank }}-final-evaluation.json \
-            --output experiments/selected-r${{ steps.rank.outputs.rank }}-final-error-analysis.json
+          python scripts/analyze_errors.py             experiments/selected-r${{ steps.rank.outputs.rank }}-final-evaluation.json             --output experiments/selected-r${{ steps.rank.outputs.rank }}-final-error-analysis.json
       - name: Compare predictions
         env: { PYTHONPATH: src }
         run: |
-          python scripts/compare_predictions.py \
-            experiments/frozen-evaluation.json \
-            experiments/selected-r${{ steps.rank.outputs.rank }}-final-evaluation.json \
-            --output experiments/frozen-vs-final-changes.json
+          python scripts/compare_predictions.py             experiments/frozen-evaluation.json             experiments/selected-r${{ steps.rank.outputs.rank }}-final-evaluation.json             --output experiments/frozen-vs-final-changes.json
       - name: Compile results
         env: { PYTHONPATH: src }
         run: python scripts/compile_results.py
       - name: Write benchmark report
         env: { PYTHONPATH: src }
         run: |
-          python scripts/write_benchmark_report.py \
-            --summary experiments/summary.json \
-            --selection selected-rank/selected-rank.json \
-            --errors experiments/selected-r${{ steps.rank.outputs.rank }}-final-error-analysis.json \
-            --output docs/BENCHMARK-REPORT.md \
-            --run-id "$GITHUB_RUN_ID"
+          python scripts/write_benchmark_report.py             --summary experiments/summary.json             --selection experiments/selected-rank.json             --errors experiments/selected-r${{ steps.rank.outputs.rank }}-final-error-analysis.json             --output docs/BENCHMARK-REPORT.md             --run-id "$GITHUB_RUN_ID"
       - name: Inference smoke
         env: { PYTHONPATH: src }
         run: |
-          python -m pretrained_llm_adaptation.cli predict \
-            --model-dir artifacts/runs/selected-r${{ steps.rank.outputs.rank }}-final \
-            --text "How long will my card take to arrive?"
+          python -m pretrained_llm_adaptation.cli predict             --model-dir artifacts/runs/selected-r${{ steps.rank.outputs.rank }}-final             --text "How long will my card take to arrive?"
       - uses: actions/upload-artifact@v4
         with:
           name: final-benchmark-evidence

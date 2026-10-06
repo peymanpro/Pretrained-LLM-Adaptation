@@ -58,9 +58,19 @@ def main() -> None:
     if frozen_path.exists():
         rows.append(_row("B2 Frozen DeBERTa", _load(frozen_path), runs / "frozen-deberta"))
 
-    for path in sorted(experiments.glob("ablation-r*-evaluation.json")):
-        rank = path.stem.split("ablation-r", 1)[1].split("-evaluation", 1)[0]
-        rows.append(_row(f"A1 LoRA r={rank}", _load(path), runs / f"ablation-r{rank}"))
+    ablation_paths = sorted(
+        set(experiments.glob("ablation-r*-validation.json"))
+        | set(experiments.glob("ablation-r*-evaluation.json"))
+    )
+    for path in ablation_paths:
+        rank = path.stem.split("ablation-r", 1)[1].split("-", 1)[0]
+        rows.append(
+            _row(
+                f"A1 LoRA r={rank}",
+                _load(path),
+                runs / f"ablation-r{rank}",
+            )
+        )
 
     final_paths = sorted(experiments.glob("selected-r*-final-evaluation.json"))
     for path in final_paths:

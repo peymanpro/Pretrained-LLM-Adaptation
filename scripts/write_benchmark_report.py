@@ -24,8 +24,14 @@ def main() -> None:
     errors = _load(args.errors)
     selected = selection["selected"]
     rows = summary.get("experiments", [])
-    frozen = next((row for row in rows if row["experiment"] == "B2 Frozen DeBERTa"), None)
-    final = next((row for row in rows if "Final LoRA" in row["experiment"]), None)
+    frozen = next(
+        (row for row in rows if row["experiment"] == "B2 Frozen DeBERTa"),
+        None,
+    )
+    final = next(
+        (row for row in rows if "Final LoRA" in row["experiment"]),
+        None,
+    )
 
     lines = [
         "# Benchmark Report",
@@ -49,54 +55,62 @@ def main() -> None:
         "",
     ]
     if final:
-        lines.extend([
-            "| Metric | Value |",
-            "|---|---:|",
-            f"| Accuracy | {final['accuracy']:.4f} |",
-            f"| Macro F1 | {final['macro_f1']:.4f} |",
-            f"| Weighted F1 | {final['weighted_f1']:.4f} |",
-            f"| Trainable parameters | {final.get('trainable_parameters', 'n/a')} |",
-            f"| Trainable percentage | {final.get('trainable_percentage', 'n/a')} |",
-            f"| Training runtime (s) | {final.get('training_runtime_seconds', 'n/a')} |",
-            "",
-        ])
+        lines.extend(
+            [
+                "| Metric | Value |",
+                "|---|---:|",
+                f"| Accuracy | {final['accuracy']:.4f} |",
+                f"| Macro F1 | {final['macro_f1']:.4f} |",
+                f"| Weighted F1 | {final['weighted_f1']:.4f} |",
+                f"| Trainable parameters | {final.get('trainable_parameters', 'n/a')} |",
+                f"| Trainable percentage | {final.get('trainable_percentage', 'n/a')} |",
+                f"| Training runtime (s) | {final.get('training_runtime_seconds', 'n/a')} |",
+                "",
+            ]
+        )
     if frozen:
-        lines.extend([
-            "## Frozen baseline",
+        lines.extend(
+            [
+                "## Frozen baseline",
+                "",
+                f"- Accuracy: **{frozen['accuracy']:.4f}**",
+                f"- Macro F1: **{frozen['macro_f1']:.4f}**",
+                f"- Weighted F1: **{frozen['weighted_f1']:.4f}**",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## Error analysis",
             "",
-            f"- Accuracy: **{frozen['accuracy']:.4f}**",
-            f"- Macro F1: **{frozen['macro_f1']:.4f}**",
-            f"- Weighted F1: **{frozen['weighted_f1']:.4f}**",
+            f"- Test examples: **{errors.get('total', 0)}**",
+            f"- Errors: **{errors.get('errors', 0)}**",
+            f"- Error rate: **{errors.get('error_rate', 0.0):.4f}**",
             "",
-        ])
-    lines.extend([
-        "## Error analysis",
-        "",
-        f"- Test examples: **{errors.get('total', 0)}**",
-        f"- Errors: **{errors.get('errors', 0)}**",
-        f"- Error rate: **{errors.get('error_rate', 0.0):.4f}**",
-        "",
-        "### Top confusion pairs",
-        "",
-        "| Gold | Predicted | Count |",
-        "|---|---|---:|",
-    ])
+            "### Top confusion pairs",
+            "",
+            "| Gold | Predicted | Count |",
+            "|---|---|---:|",
+        ]
+    )
     for row in errors.get("top_confusions", [])[:10]:
         lines.append(f"| {row['gold']} | {row['predicted']} | {row['count']} |")
-    lines.extend([
-        "",
-        "## Interpretation",
-        "",
-        (
-            "This benchmark is evidence of a reproducible adaptation pipeline, not "
-            "a state-of-the-art claim. Training is deliberately resource-bounded."
-        ),
-        "",
-        "## Provenance",
-        "",
-        "Model/data revisions and training configuration are retained in run metadata artifacts.",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Interpretation",
+            "",
+            (
+                "This benchmark is evidence of a reproducible adaptation pipeline, not "
+                "a state-of-the-art claim. Training is deliberately resource-bounded."
+            ),
+            "",
+            "## Provenance",
+            "",
+            "Model/data revisions and training configuration are retained in run metadata artifacts.",
+            "",
+        ]
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(lines), encoding="utf-8")
 

@@ -174,3 +174,5 @@ MIT
 ## Benchmark report
 
 A successful benchmark run publishes `docs/BENCHMARK-REPORT.md` and the measured artifacts under `experiments/` automatically. The repository does not carry forward stale benchmark outputs between runs; pending values are never replaced with external benchmark numbers.
+
+Release verification is performed on the current `main` commit before a benchmark result is treated as final evidence.

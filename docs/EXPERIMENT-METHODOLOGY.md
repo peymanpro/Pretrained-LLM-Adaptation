@@ -1,48 +1,88 @@
 # Experiment Methodology
 
-## Dataset
+## Benchmark protocol
 
-Use PolyAI BANKING77 and preserve the official test set. The original training set is split into fit/validation subsets with stratification and seed 42.
+The final portfolio benchmark is resource-bounded so that the complete pipeline can execute reliably on GitHub-hosted CPU runners.
 
-The source files are downloaded from the original PolyAI dataset repository using the pinned commit in configuration. Raw files are intentionally not committed to Git.
+The protocol uses the full public BANKING77 test split for final evaluation while limiting training runs to deterministic stratified subsets recorded in the configuration and run metadata.
+
+Training allocation:
+- frozen baseline: 1,000 training examples and 300 validation examples;
+- LoRA rank selection: 1,000 training examples and 300 validation examples for each of r=4, r=8, and r=16;
+- final LoRA run: 2,000 training examples and 400 validation examples;
+- final test metrics: full BANKING77 public test split.
+
+This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.
+
+## Data
+
+PolyAI BANKING77 is downloaded from the pinned upstream revision in configuration. The preparation pipeline validates schema, labels, empty text, duplicates, and train/test leakage, then creates deterministic stratified fit/validation splits.
+
+The public test set is never used for rank selection.
 
 ## Baselines
 
 1. Majority-class floor.
 2. TF-IDF plus logistic regression.
-3. Frozen DeBERTa encoder with a trainable task head.
+3. Frozen DeBERTa representation baseline.
 4. LoRA adaptation of DeBERTa-v3-small.
 
-Full fine-tuning is conditional on available compute.
+Full fine-tuning remains conditional because this benchmark is explicitly CPU-bounded.
 
-## Primary metrics
+## Model
 
+Primary model: microsoft/deberta-v3-small
+
+The exact Hugging Face revision is pinned in benchmark configuration.
+
+## LoRA
+
+The benchmark uses PEFT LoRA with query/value projections and explicitly saved classifier/pooler modules.
+
+Target names are verified against the instantiated DeBERTa architecture before training.
+
+## Rank selection
+
+Validation macro F1 is the selection metric. The public test set is excluded from this decision.
+
+Ranks evaluated:
+- r=4;
+- r=8;
+- r=16.
+
+The final selected rank is retrained on the larger final training allocation and then evaluated once on the held-out test split.
+
+## Evaluation
+
+Primary metrics:
 - accuracy;
 - macro F1;
 - weighted F1;
-- per-class precision/recall/F1;
+- per-class metrics;
 - confusion matrix.
 
-## LoRA configuration
+Additional evidence:
+- trainable parameter count;
+- trainable percentage;
+- training runtime;
+- error distribution;
+- representative prediction changes;
+- inference smoke test.
 
-The initial configuration targets query_proj/value_proj attention projections with rank 8, alpha 16, dropout 0.1, and explicitly saved task modules. The exact target module names must be inspected on the instantiated model before the first training run.
+## Error analysis
 
-PEFT documents modules_to_save as the mechanism for training and saving additional modules alongside adapter weights.
+The final test predictions are analyzed for highest-frequency confusion pairs, error counts by gold intent, error counts by input-length bucket, and high-confidence errors.
 
-## Leakage controls
+## Limitations
 
-No test sample is used for hyperparameter selection. Text overlap is checked after whitespace normalization and case folding. Duplicates within splits are reported.
+The resource-bounded training allocation limits statistical power and may understate or distort performance relative to full-data training. Results should therefore be interpreted as engineering evidence for the adaptation pipeline, not as a claim about the best achievable BANKING77 score.
 
-## Ablation
-
-The default rank ablation is r = 4, 8, and 16. Final conclusions must be based on actual experiment output.
+The project does not claim state-of-the-art performance.
 
 ## Evidence rule
 
-A result is measured only when the command completes and the generated artifact can be tied back to a concrete configuration. This repository never substitutes an external benchmark number for a result produced by the local pipeline.
-
-## Controlled benchmark execution
-
-The full benchmark is intentionally not executed on every push. It is started explicitly with the `[run-experiment]` commit marker or through the GitHub Actions workflow dispatcher.
-
-The benchmark produces the classical baselines, frozen-representation baseline, LoRA rank ablation, validation-based rank selection, a full-data final LoRA run, held-out test evaluation, structured error analysis, prediction comparison, model inspection, inference smoke output, and a compiled results summary.
+A result is accepted only when:
+1. the producing workflow step completes successfully;
+2. the generated artifact exists;
+3. the configuration/model/data provenance is recorded;
+4. the test split was not used for model selection.

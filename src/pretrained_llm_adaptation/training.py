@@ -72,11 +72,7 @@ def _parameter_group_kind(
 
 def _is_no_decay_parameter(name: str) -> bool:
     lowered = name.lower()
-    return (
-        lowered.endswith(".bias")
-        or "layernorm.weight" in lowered
-        or "layer_norm.weight" in lowered
-    )
+    return lowered.endswith(".bias") or "layernorm.weight" in lowered or "layer_norm.weight" in lowered
 
 
 def _trainer(
@@ -117,9 +113,7 @@ def _trainer(
                     lr = head_lr
                 else:
                     lr = self.args.learning_rate
-                weight_decay = (
-                    0.0 if _is_no_decay_parameter(name) else self.args.weight_decay
-                )
+                weight_decay = 0.0 if _is_no_decay_parameter(name) else self.args.weight_decay
                 key = (kind, weight_decay)
                 if key not in parameter_groups:
                     parameter_groups[key] = {

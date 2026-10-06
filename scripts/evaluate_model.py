@@ -85,7 +85,7 @@ def main() -> None:
         "--data",
         default="data/processed/banking77/test.jsonl",
     )
-    parser.add_argument("--max-length", type=int, default=128)
+    parser.add_argument("--max-length", type=int, default=64)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument(
         "--output",

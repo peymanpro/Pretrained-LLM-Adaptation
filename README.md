@@ -137,14 +137,14 @@ The benchmark is deliberately **resource-bounded** so the complete pipeline can 
 
 The current benchmark protocol is:
 
-| Stage | Training data | Validation data | Epochs |
-|---|---:|---:|---:|
-| Frozen DeBERTa | 600 | 200 | 2 |
-| LoRA rank 4 | 600 | 200 | 3 |
-| LoRA rank 8 | 600 | 200 | 3 |
-| LoRA rank 16 | 600 | 200 | 3 |
-| Final LoRA | 1,200 | 300 | 3 |
-| Final evaluation | — | — | Full 3,080-example test split |
+| Stage | Training data | Validation data | Epochs | Max length |
+|---|---:|---:|---:|---:|
+| Frozen DeBERTa | 600 | 200 | 2 | 48 |
+| LoRA rank 4 | 3,000 | 1,000 | 1 | 48 |
+| LoRA rank 8 | 3,000 | 1,000 | 1 | 48 |
+| LoRA rank 16 | 3,000 | 1,000 | 1 | 48 |
+| Final LoRA | 1,200 | 300 | 3 | 48 |
+| Final evaluation | — | — | — | Full 3,080-example test split |
 
 Common benchmark settings include:
 
@@ -448,11 +448,11 @@ The repository does not replace missing measurements with numbers copied from ex
 
 ## Current status
 
-**Engineering implementation complete — empirical benchmark verification pending.**
+**Engineering implementation complete — final empirical verification in progress.**
 
 The source package, data pipeline, baselines, LoRA adaptation path, evaluation safeguards, inference CLI, tests, CI, methodology documentation, and benchmark publication workflow are implemented.
 
-The final release remains gated on a successful benchmark run against the current `main` commit and publication of its resulting evidence.
+The release benchmark is triggered from the current `main` commit. No final performance claim is made until that run completes its integrity checks and publishes the resulting evidence.
 
 ## Limitations
 

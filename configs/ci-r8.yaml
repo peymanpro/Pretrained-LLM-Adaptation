@@ -10,7 +10,7 @@ dataset:
 model:
   name: microsoft/deberta-v3-small
   revision: a59be8aa63396e73dbb45a1487e4cde4be98bfa4
-  max_length: 64
+  max_length: 48
 lora:
   enabled: true
   r: 8

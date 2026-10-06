@@ -88,6 +88,11 @@ def main() -> None:
     parser.add_argument("--max-length", type=int, default=64)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument(
+        "--allow-degenerate",
+        action="store_true",
+        help="Allow a one-intent prediction collapse for diagnostic baseline/ablation runs.",
+    )
+    parser.add_argument(
         "--output",
         default="experiments/model-evaluation.json",
     )
@@ -102,7 +107,7 @@ def main() -> None:
         args.max_length,
         args.batch_size,
     )
-    if len(set(predictions)) < 2:
+    if len(set(predictions)) < 2 and not args.allow_degenerate:
         raise RuntimeError("Degenerate model output: evaluation predicted only one unique intent.")
     labels = sorted({sample.label for sample in samples})
     report = detailed_report(

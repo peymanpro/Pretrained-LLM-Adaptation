@@ -47,9 +47,9 @@ This task is small enough to experiment with under constrained compute, but rich
 
 The primary pretrained model is **microsoft/deberta-v3-small**.
 
-**LoRA through Hugging Face PEFT** is the main adaptation method. The central question I am exploring is simple:
+**LoRA through Hugging Face PEFT** is the main adaptation method. The central question is simple:
 
-> **How much task-specific improvement can I obtain while updating only a small fraction of the pretrained model?**
+> **How much task-specific improvement can be obtained while updating only a small fraction of the pretrained model?**
 
 The implementation verifies the target modules against the instantiated DeBERTa architecture before applying LoRA. For sequence classification, the classifier and pooler modules are preserved and saved so that the adapted model can be reconstructed correctly.
 
@@ -57,7 +57,7 @@ The implementation verifies the target modules against the instantiated DeBERTa 
 
 A small baseline ladder helps separate different sources of performance rather than treating LoRA as a black box.
 
-| ID | Method | What I use it for |
+| ID | Method | Purpose |
 |---|---|---|
 | B0 | Majority class | Evaluation floor and pipeline sanity check. |
 | B1 | TF-IDF + Logistic Regression | Measures how far a classical lexical approach can go without a Transformer. |
@@ -69,7 +69,7 @@ A small baseline ladder helps separate different sources of performance rather t
 
 The evaluation goes beyond a single headline number.
 
-For model quality, I measure:
+Model quality is assessed with:
 
 - accuracy;
 - macro F1;
@@ -77,7 +77,7 @@ For model quality, I measure:
 - per-class precision, recall, and F1;
 - confusion matrices.
 
-Where the runtime allows reliable measurement, I also record:
+Where the runtime allows reliable measurement, the following are also recorded:
 
 - total and trainable parameter counts;
 - trainable-parameter percentage;
@@ -128,7 +128,7 @@ target modules
 modules to save
 ```
 
-For DeBERTa, I target the query and value projections and explicitly verify that the expected module names exist before training.
+For DeBERTa, the query and value projections are targeted, with explicit verification that the expected module names exist before training.
 
 Trainable versus frozen parameters are also reported to quantify what parameter-efficient adaptation means for this model.
 
@@ -160,7 +160,7 @@ A small CLI provides the inference surface.
 
 It can load the base model and adapter, classify an input, and expose the resulting intent and confidence. The benchmark also runs an inference smoke test after producing the final adapter artifact.
 
-This gives me a simple path from:
+This provides a simple path from:
 
 ```text
 training evidence → saved adapter → reproducible inference
@@ -280,7 +280,7 @@ For the final release, the benchmark is run on the current `main` commit before 
 
 ## Evidence standard
 
-I distinguish between **implementation** and **measurement**.
+The project distinguishes between **implementation** and **measurement**.
 
 A planned experiment is not a result.
 

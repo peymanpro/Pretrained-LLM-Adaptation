@@ -211,8 +211,8 @@ llm-adapt
 For a saved LoRA adapter:
 
 ```bash
-python -m pretrained_llm_adaptation.cli predict \
-  --model-dir artifacts/runs/selected-r8-final \
+llm-adapt predict \
+  --model-dir artifacts/runs/selected-r<rank>-final \
   --text "How long will my card take to arrive?"
 ```
 

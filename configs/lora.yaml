@@ -23,9 +23,8 @@ lora:
   modules_to_save: [classifier, pooler]
 
 training:
-  learning_rate: 0.0002
-  head_learning_rate: 0.00005
-  classifier_learning_rate: 0.0002
+  learning_rate: 0.00005
+
   per_device_train_batch_size: 16
   per_device_eval_batch_size: 32
   gradient_accumulation_steps: 1

@@ -24,7 +24,7 @@ def main() -> None:
         "--revision",
         default="a59be8aa63396e73dbb45a1487e4cde4be98bfa4",
     )
-    predict_parser.add_argument("--max-length", type=int, default=128)
+    predict_parser.add_argument("--max-length", type=int, default=48)
     predict_parser.set_defaults(handler=_predict)
 
     args = parser.parse_args()

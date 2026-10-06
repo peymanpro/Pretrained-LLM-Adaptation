@@ -7,9 +7,9 @@ The final portfolio benchmark is resource-bounded so that the complete pipeline 
 The protocol uses the full public BANKING77 test split for final evaluation while limiting training runs to deterministic stratified subsets recorded in the configuration and run metadata.
 
 Training allocation:
-- frozen baseline: 1,000 training examples and 300 validation examples;
-- LoRA rank selection: 1,000 training examples and 300 validation examples for each of r=4, r=8, and r=16;
-- final LoRA run: 2,000 training examples and 400 validation examples;
+- frozen baseline: 600 training examples and 200 validation examples;
+- LoRA rank selection: 600 training examples and 200 validation examples for each of r=4, r=8, and r=16;
+- final LoRA run: 1,200 training examples and 300 validation examples;
 - final test metrics: full BANKING77 public test split.
 
 This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.

@@ -8,11 +8,11 @@ The protocol uses the full public BANKING77 test split for final evaluation whil
 
 Training allocation:
 - frozen baseline: 600 training examples and 200 validation examples for 2 epochs;
-- LoRA rank selection: 600 training examples and 200 validation examples for each of r=4, r=8, and r=16 for 2 epochs;
-- final LoRA run: 1,200 training examples and 300 validation examples for 2 epochs;
+- LoRA rank selection: 600 training examples and 200 validation examples for each of r=4, r=8, and r=16 for 3 epochs;
+- final LoRA run: 1,200 training examples and 300 validation examples for 3 epochs;
 - final test metrics: full BANKING77 public test split.
 
-The benchmark uses a conservative 2e-5 learning rate. Earlier higher-rate runs became numerically unstable, so the final protocol keeps the lower rate and uses two epochs. The sequence length is capped at 48; inspection of the prepared pinned split showed that this retains more than 99% of examples without truncation while reducing CPU work. This remains a resource-bounded engineering benchmark rather than a full-data training study.
+The benchmark uses a conservative 5e-5 learning rate for LoRA; the frozen head-only baseline retains 2e-5. Earlier higher-rate runs became numerically unstable, so the final protocol keeps a lower rate and uses three epochs for LoRA. The sequence length is capped at 48; inspection of the prepared pinned split showed that this retains more than 99% of examples without truncation while reducing CPU work. This remains a resource-bounded engineering benchmark rather than a full-data training study.
 
 This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.
 

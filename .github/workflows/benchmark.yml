@@ -7,7 +7,7 @@ permissions:
   contents: write
 concurrency:
   group: benchmark-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]') }}
-  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]') }}
+  cancel-in-progress: false
 env:
   PYTHONUNBUFFERED: "1"
   OMP_NUM_THREADS: "4"
@@ -145,7 +145,8 @@ jobs:
       - name: Train final LoRA
         env: { PYTHONPATH: src }
         run: |
-          python scripts/train_lora.py             --config configs/ci-final.yaml             --experiment-name selected-r${{ steps.rank.outputs.rank }}-final
+          rank=$(python -c 'import json; print(json.load(open("experiments/selected-rank.json"))["selected"]["rank"])')
+          python scripts/train_lora.py             --config configs/ci-final.yaml             --experiment-name "selected-r${rank}-final"             --rank "$rank"
       - name: Evaluate final model on full test
         env: { PYTHONPATH: src }
         run: |
@@ -165,6 +166,61 @@ jobs:
         env: { PYTHONPATH: src }
         run: |
           python scripts/write_benchmark_report.py             --summary experiments/summary.json             --selection experiments/selected-rank.json             --errors experiments/selected-r${{ steps.rank.outputs.rank }}-final-error-analysis.json             --output docs/BENCHMARK-REPORT.md             --run-id "$GITHUB_RUN_ID"
+      - name: Verify benchmark integrity
+        env: { PYTHONPATH: src }
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          selection = json.loads(Path("experiments/selected-rank.json").read_text())
+          selected_rank = int(selection["selected"]["rank"])
+          run_dir = Path("artifacts/runs") / f"selected-r{selected_rank}-final"
+          metadata = json.loads((run_dir / "run_metadata.json").read_text())
+          evaluation = json.loads(Path(f"experiments/selected-r{selected_rank}-final-evaluation.json").read_text())
+          summary = json.loads(Path("experiments/summary.json").read_text())
+
+          configured_rank = int(metadata["config"]["lora"]["r"])
+          if configured_rank != selected_rank:
+              raise SystemExit(f"final rank mismatch: selected={selected_rank}, configured={configured_rank}")
+
+          predictions = evaluation["predictions"]
+          distinct = {row["predicted"] for row in predictions}
+          if len(predictions) < 1000:
+              raise SystemExit(f"final evaluation is unexpectedly small: {len(predictions)}")
+          if len(distinct) < 5:
+              raise SystemExit(f"final classifier appears collapsed: {len(distinct)} distinct predictions")
+
+          for metric in ("accuracy", "macro_f1", "weighted_f1"):
+              value = float(evaluation["report"]["metrics"][metric])
+              if not 0.0 <= value <= 1.0:
+                  raise SystemExit(f"invalid {metric}: {value}")
+
+          names = {row["experiment"] for row in summary["experiments"]}
+          required = {"B0 Majority", "B1 TF-IDF + LR", "B2 Frozen DeBERTa"}
+          if not required.issubset(names):
+              raise SystemExit("compiled summary is missing required baseline rows")
+
+          required_files = [
+              "adapter_model.safetensors",
+              "adapter_config.json",
+              "tokenizer.json",
+              "tokenizer_config.json",
+              "run_metadata.json",
+          ]
+          missing = [name for name in required_files if not (run_dir / name).exists()]
+          if missing:
+              raise SystemExit("final adapter evidence missing: " + ", ".join(missing))
+
+          print(json.dumps({
+              "status": "verified",
+              "selected_rank": selected_rank,
+              "final_examples": len(predictions),
+              "distinct_predictions": len(distinct),
+              "metrics": evaluation["report"]["metrics"],
+          }, indent=2))
+          PY
+
       - name: Inference smoke
         env: { PYTHONPATH: src }
         run: |
@@ -175,7 +231,11 @@ jobs:
           path: |
             experiments/
             docs/BENCHMARK-REPORT.md
-            artifacts/runs/*/run_metadata.json
+            artifacts/runs/selected-r*-final/adapter_model.safetensors
+            artifacts/runs/selected-r*-final/adapter_config.json
+            artifacts/runs/selected-r*-final/tokenizer.json
+            artifacts/runs/selected-r*-final/tokenizer_config.json
+            artifacts/runs/selected-r*-final/run_metadata.json
 
   publish:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]')

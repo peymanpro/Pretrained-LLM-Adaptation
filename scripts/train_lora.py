@@ -17,6 +17,12 @@ def main() -> None:
     parser.add_argument("--epochs", type=float, default=None)
     parser.add_argument("--experiment-name", default=None)
     parser.add_argument(
+        "--rank",
+        type=int,
+        default=None,
+        help="Override LoRA rank while preserving the configured alpha/r ratio.",
+    )
+    parser.add_argument(
         "--full-data",
         action="store_true",
         help="Disable training/validation sample caps from the config.",
@@ -30,6 +36,18 @@ def main() -> None:
         )
     if args.experiment_name is not None:
         config = replace(config, experiment_name=args.experiment_name)
+    if args.rank is not None:
+        if args.rank < 1:
+            raise ValueError("--rank must be positive")
+        ratio = config.lora.alpha / config.lora.r
+        config = replace(
+            config,
+            lora=replace(
+                config.lora,
+                r=args.rank,
+                alpha=max(1, round(args.rank * ratio)),
+            ),
+        )
     if args.full_data:
         config = replace(
             config,

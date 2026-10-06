@@ -2,9 +2,9 @@
 
 ## Status
 
-**Engineering implementation complete — empirical benchmark verification pending.**
+**Engineering implementation complete — final empirical benchmark verification in progress.**
 
-The source, data engineering, LoRA adaptation path, evaluation safeguards, inference CLI, CI, and benchmark publication workflow are implemented. No final model-performance claim is made until a complete benchmark run produces verified evidence.
+The source, data engineering, LoRA adaptation path, evaluation safeguards, inference CLI, CI, and benchmark publication workflow are implemented. No final model-performance claim is made until the current benchmark run produces verified evidence.
 
 ## Purpose
 
@@ -309,4 +309,4 @@ A file existing is not sufficient evidence of completion.
 
 **Current implementation choice:** BANKING77 intent classification with microsoft/deberta-v3-small, using LoRA as the primary adaptation method and a classical + frozen-representation baseline ladder.
 
-The implementation is complete enough for empirical verification. Final feasibility/performance claims remain gated on the complete benchmark evidence.
+The implementation is complete enough for final verification. Final feasibility/performance claims remain gated on the current benchmark evidence.

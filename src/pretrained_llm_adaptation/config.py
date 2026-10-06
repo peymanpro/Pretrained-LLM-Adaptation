@@ -39,6 +39,7 @@ class LoRAConfig:
 class TrainingConfig:
     learning_rate: float = 2.0e-4
     head_learning_rate: float | None = None
+    classifier_learning_rate: float | None = None
     per_device_train_batch_size: int = 16
     per_device_eval_batch_size: int = 32
     gradient_accumulation_steps: int = 1

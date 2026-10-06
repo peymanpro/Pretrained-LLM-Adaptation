@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: benchmark-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]') }}
+  group: benchmark-${{ github.workflow }}-${{ github.sha }}
   cancel-in-progress: false
 env:
   PYTHONUNBUFFERED: "1"

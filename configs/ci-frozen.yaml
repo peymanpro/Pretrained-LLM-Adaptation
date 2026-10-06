@@ -1,6 +1,5 @@
 experiment_name: frozen-deberta
 task: banking77-intent-classification
-
 dataset:
   name: PolyAI/banking77
   source_revision: 57ec275d8078af65b7731c2a98be812d844a6d6b
@@ -8,21 +7,18 @@ dataset:
   processed_dir: data/processed/banking77
   validation_fraction: 0.2
   seed: 42
-
 model:
   name: microsoft/deberta-v3-small
   revision: a59be8aa63396e73dbb45a1487e4cde4be98bfa4
   max_length: 64
-
 lora:
   enabled: false
-
 training:
   learning_rate: 0.00002
   per_device_train_batch_size: 32
   per_device_eval_batch_size: 64
   gradient_accumulation_steps: 1
-  num_train_epochs: 3
+  num_train_epochs: 10
   weight_decay: 0.01
   warmup_ratio: 0.1
   eval_strategy: epoch

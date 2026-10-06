@@ -107,7 +107,10 @@ def main() -> None:
             "",
             "## Provenance",
             "",
-            "Model/data revisions and training configuration are retained in run metadata artifacts.",
+            (
+                "Model/data revisions and training configuration are retained "
+                "in run metadata artifacts."
+            ),
             "",
         ]
     )

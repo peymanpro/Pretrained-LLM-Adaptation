@@ -6,8 +6,8 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: benchmark
-  cancel-in-progress: true
+  group: benchmark-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]') }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-experiment]') }}
 env:
   PYTHONUNBUFFERED: "1"
   OMP_NUM_THREADS: "4"

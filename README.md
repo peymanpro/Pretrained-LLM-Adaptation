@@ -1,131 +1,247 @@
 # Pretrained LLM Adaptation
 
-A reproducible study of adapting a pretrained language model to a concrete downstream NLP task using parameter-efficient fine-tuning.
+I built this project to answer a practical question: **how do I take a pretrained language model, adapt it to a real downstream NLP task, and still keep the whole process measurable and reproducible?**
 
-> Portfolio focus: move from understanding LLM internals to engineering, measuring, and reproducing an actual adaptation workflow.
+<p align="center">
+  <img src="assets/adaptation-cycle.svg" alt="Animated workflow of my pretrained LLM adaptation process" width="900">
+</p>
 
-## What this project does
+> **My focus:** move beyond simply knowing how LLMs work and demonstrate how I engineer, measure, debug, and reproduce an actual model-adaptation workflow.
 
-~~~text
-BANKING77
+## Why I built this
+
+I did not want this repository to be another minimal fine-tuning example where a pretrained model is loaded, a few lines of training code are added, and a final accuracy number is presented without much context.
+
+Instead, I wanted to work through the complete engineering path:
+
+```text
+Problem
    ↓
-Data validation + leakage removal checks
+Data engineering + leakage checks
    ↓
 Classical baselines
    ↓
-DeBERTa-v3-small
+Pretrained model
    ↓
-LoRA / PEFT
+LoRA / PEFT adaptation
    ↓
-Evaluation + ablation + error analysis
+Evaluation + ablation
    ↓
-Base model + adapter inference
-~~~
+Error analysis
+   ↓
+Inference
+   ↓
+Reproducible evidence
+   ↺
+```
 
-The primary task is 77-class banking intent classification. The official dataset contains 13,083 English customer-service queries: 10,003 train and 3,080 test examples.
+The goal is not just to make a model run. **My goal is to make every important decision traceable to code, configuration, tests, or measured evidence.**
 
-The primary model is microsoft/deberta-v3-small. Its model card reports 6 Transformer layers, hidden size 768, 44M backbone parameters, and a 128K-token vocabulary whose embedding layer adds 98M parameters.
+## The task I chose
 
-The primary adaptation method is LoRA through PEFT. The PEFT documentation defines rank, scaling, dropout, target modules, and saved trainable modules as the core LoRA configuration controls.
+I use the **BANKING77** intent-classification dataset as the concrete downstream task. It contains 13,083 English customer-service queries across 77 intents, with 10,003 training examples and 3,080 test examples.
 
-## Baseline ladder
+I chose this problem because it is small enough to experiment with under constrained compute, but rich enough to expose the real issues that matter in NLP adaptation: closely related intents, class imbalance, leakage, model selection, and meaningful error analysis.
 
-| ID | Method | Purpose |
+## The model and adaptation method
+
+My primary pretrained model is **microsoft/deberta-v3-small**.
+
+I use **LoRA through Hugging Face PEFT** as the main adaptation method. The central question I am exploring is simple:
+
+> **How much task-specific improvement can I obtain while updating only a small fraction of the pretrained model?**
+
+I explicitly verify the target modules against the instantiated DeBERTa architecture before applying LoRA. For sequence classification, I also preserve and save the classifier and pooler modules so that the adapted model can be reconstructed correctly.
+
+## My baseline ladder
+
+I use a small baseline ladder so that I can separate different sources of performance rather than treating LoRA as a black box.
+
+| ID | Method | What I use it for |
 |---|---|---|
-| B0 | Majority class | Evaluation floor |
-| B1 | TF-IDF + Logistic Regression | Classical non-Transformer baseline |
-| B2 | Frozen DeBERTa | Value of pretrained representations without encoder adaptation |
-| A1 | LoRA | Primary adaptation experiment |
-| A2 | Full fine-tuning | Conditional compute-controlled comparison |
+| B0 | Majority class | I use this as the evaluation floor and pipeline sanity check. |
+| B1 | TF-IDF + Logistic Regression | I use this to measure how far a classical lexical approach can go without a Transformer. |
+| B2 | Frozen DeBERTa | I use this to isolate the value of pretrained representations without encoder adaptation. |
+| A1 | LoRA | This is my primary parameter-efficient adaptation experiment. |
+| A2 | Full fine-tuning | I keep this as a conditional compute-controlled comparison rather than forcing an irresponsible benchmark. |
 
-## Evaluation
+## What I measure
 
-Primary metrics are accuracy, macro F1, weighted F1, per-class metrics, and a confusion matrix. Resource measurements include trainable parameter count and, when reliably available, training time, memory, adapter size, and inference latency.
+I care about more than one headline number.
 
-## Reproducibility
+For model quality, I measure:
 
-Experiments are configuration-driven. Dataset source revision, model revision, random seed, split rule, tokenizer, sequence length, training parameters, and LoRA settings are recorded with each run.
+- accuracy;
+- macro F1;
+- weighted F1;
+- per-class precision, recall, and F1;
+- confusion matrices.
 
-The repository's final portfolio benchmark is deliberately resource-bounded for GitHub-hosted CPU execution. Exact train/test text overlaps from the upstream dataset are excluded from the training pool and recorded in the data manifest. Rank selection uses validation only; final evaluation uses the full public BANKING77 test split. The benchmark runs the frozen baseline and LoRA rank ablation in parallel, then retrains the selected rank and publishes verified evidence automatically. The current protocol uses standard Trainer/AdamW training at `5e-5`, with FP32-safe settings (`adam_epsilon=1e-6`, gradient clipping at `1.0`) and non-finite prediction guards.
+Where the runtime allows reliable measurement, I also record:
 
-Raw data and large model weights are not committed to Git.
+- total and trainable parameter counts;
+- trainable-parameter percentage;
+- training runtime;
+- memory;
+- adapter size;
+- inference latency.
 
-## Run locally
+For me, the important part is not simply asking **“which model scored higher?”**. I also want to know **why**, where it fails, and what changes when I adapt the model.
+
+## How I keep the experiments reproducible
+
+I keep experiments configuration-driven and record the important provenance with every substantive run.
+
+That includes the dataset and model revisions, seed, split definition, tokenizer, maximum sequence length, training parameters, and LoRA configuration.
+
+I also treat the public test set as a held-out evaluation set. Rank selection is performed on validation data, and the final selected configuration is then retrained before the final test evaluation.
+
+Because the project is designed to run on GitHub-hosted CPU runners, the benchmark is intentionally resource-bounded. I am explicit about that limitation rather than presenting a constrained experiment as a full-data or state-of-the-art study.
+
+Raw datasets and large model weights are not committed to Git.
+
+## Data engineering
+
+Before training, I validate the dataset rather than assuming the upstream files are already suitable for an experiment.
+
+The preparation pipeline checks:
+
+1. schema;
+2. label validity;
+3. empty or malformed text;
+4. duplicate samples;
+5. train/test text overlap;
+6. deterministic fit/validation splitting;
+7. leakage between fit and validation sets.
+
+Exact normalized train/test text overlaps are removed from the training pool and recorded in the generated manifest.
+
+## LoRA implementation
+
+I keep the LoRA configuration explicit:
+
+```text
+rank
+alpha
+dropout
+target modules
+modules to save
+```
+
+For DeBERTa, I target the query and value projections and explicitly verify that the expected module names exist before training.
+
+I also calculate trainable versus frozen parameters so that I can quantify what parameter-efficient adaptation actually means for this model.
+
+## Evaluation and failure handling
+
+I do not want invalid runs to quietly become published results.
+
+The evaluation path checks for non-finite logits and probabilities. It also detects prediction collapse in final benchmark evaluations so that a broken or numerically invalid model is not silently treated as successful evidence.
+
+This is intentional: **a failed experiment is useful information during engineering, but it should not be disguised as a successful benchmark.**
+
+## Error analysis
+
+After final evaluation, I inspect the mistakes rather than stopping at aggregate metrics.
+
+The analysis includes:
+
+- the most frequent confusion pairs;
+- error counts by gold intent;
+- error distribution by input length;
+- high-confidence errors;
+- representative prediction changes between models.
+
+I want the error analysis to tell me what the adaptation actually changed, not just produce another table of numbers.
+
+## Inference
+
+I keep a small CLI as the inference surface.
+
+It can load the base model and adapter, classify an input, and expose the resulting intent and confidence. The benchmark also runs an inference smoke test after producing the final adapter artifact.
+
+This gives me a simple path from:
+
+```text
+training evidence → saved adapter → reproducible inference
+```
+
+## Run it locally
 
 Create a Python 3.12 environment and install the project:
 
-~~~bash
+```bash
 python -m pip install -e ".[dev]"
-~~~
+```
 
-Download the pinned source data:
+Download and prepare the pinned source data:
 
-~~~bash
+```bash
 python scripts/download_data.py --config configs/lora.yaml
 python scripts/prepare_data.py --config configs/lora.yaml
-~~~
+```
 
 Inspect the actual DeBERTa module names before LoRA training:
 
-~~~bash
+```bash
 python scripts/inspect_model.py --config configs/lora.yaml
-~~~
+```
 
 Run the classical baselines:
 
-~~~bash
+```bash
 python scripts/run_baselines.py --config configs/baseline.yaml
-~~~
+```
 
 Run the frozen representation baseline:
 
-~~~bash
+```bash
 python scripts/train_frozen.py --config configs/lora.yaml
-~~~
+```
 
 Run the LoRA experiment:
 
-~~~bash
+```bash
 python scripts/train_lora.py --config configs/lora.yaml
-~~~
+```
 
-Run the rank ablation locally:
+Run the rank ablation:
 
-~~~bash
+```bash
 bash scripts/run_rank_ablation.sh
-~~~
+```
 
-Run the complete portfolio benchmark through GitHub Actions by making a commit whose message contains `[run-experiment]`, or by starting the Benchmark workflow manually.
+Run the complete portfolio benchmark through GitHub Actions by committing a message containing `[run-experiment]`, or start the Benchmark workflow manually.
 
 Evaluate a saved LoRA adapter:
 
-~~~bash
+```bash
 python scripts/evaluate_model.py --model-dir artifacts/runs/lora-r8 --adapter
-~~~
+```
 
 Run error analysis:
 
-~~~bash
+```bash
 python scripts/analyze_errors.py experiments/model-evaluation.json
-~~~
+```
 
-Run tests:
+Run the test suite:
 
-~~~bash
+```bash
 pytest
-~~~
+```
 
 Run static checks:
 
-~~~bash
+```bash
 ruff check src tests scripts
 ruff format --check src tests scripts
 mypy src
-~~~
+```
 
 ## Repository structure
 
-~~~text
+```text
 src/pretrained_llm_adaptation/
 ├── baselines.py
 ├── config.py
@@ -144,19 +260,41 @@ docs/
 experiments/
 artifacts/
 examples/
-~~~
+```
 
-## Scope boundaries
+I keep the repository organized around one narrow lifecycle: **prepare → compare → adapt → evaluate → understand → reproduce**.
 
-This repository is about LLM adaptation. It intentionally does not introduce RAG, agents, vector databases, frontend/UI, SaaS, Kubernetes, distributed training, or a general MLOps platform.
+## What I intentionally did not build
+
+I deliberately keep this project focused on pretrained-model adaptation.
+
+That means I am **not** adding RAG, agents, vector databases, a frontend, SaaS, Kubernetes, distributed training, or a general MLOps platform just to increase the technology list.
+
+Those are useful technologies, but they answer different questions. I want this repository to communicate one thing clearly: **I can take a pretrained model and engineer a disciplined adaptation workflow around a concrete problem.**
 
 ## Current status
 
-The implementation, data pipeline, LoRA workflow, evaluation safeguards, CI checks, and benchmark publication pipeline are in place. The repository is intentionally not presenting a final performance number until a complete benchmark run produces and publishes verified evidence. This keeps release claims tied to reproducible measurements rather than planned experiments.
+The implementation, data pipeline, LoRA workflow, evaluation safeguards, CI checks, and benchmark publication pipeline are in place.
 
-## Evidence standard
+I am deliberately not presenting a final performance number until the current benchmark run produces verified evidence on the current `main` commit. This keeps my release claims tied to measurements rather than planned experiments or stale outputs.
 
-The repository distinguishes implementation from measurement. A planned experiment is not reported as a result. A metric is considered verified only after its producing command completes and the corresponding artifact is retained.
+## My evidence standard
+
+I distinguish between **implementation** and **measurement**.
+
+A planned experiment is not a result.
+
+A metric becomes verified only after the command that produces it completes successfully and the corresponding artifact is retained with its provenance.
+
+That rule is important to me because I want this repository to demonstrate engineering judgment as well as model knowledge.
+
+## Scope and limitations
+
+This project studies one English, single-domain intent-classification task using a relatively small dataset and an encoder-style pretrained model.
+
+The benchmark is resource-bounded and therefore should be interpreted as engineering evidence for the adaptation pipeline, not as a claim about the best achievable BANKING77 score.
+
+I also do not claim state-of-the-art performance.
 
 ## References
 
@@ -173,6 +311,8 @@ MIT
 
 ## Benchmark report
 
-A successful benchmark run publishes `docs/BENCHMARK-REPORT.md` and the measured artifacts under `experiments/` automatically. The repository does not carry forward stale benchmark outputs between runs; pending values are never replaced with external benchmark numbers.
+When a benchmark run is successfully verified, the workflow publishes `docs/BENCHMARK-REPORT.md` together with the measured artifacts under `experiments/`.
+
+I deliberately do not carry stale benchmark outputs forward between runs, and I never replace pending values with external benchmark numbers.
 
 Release verification is performed on the current `main` commit before a benchmark result is treated as final evidence.

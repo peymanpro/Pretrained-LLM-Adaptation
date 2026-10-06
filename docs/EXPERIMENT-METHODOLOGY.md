@@ -16,6 +16,8 @@ The benchmark uses the standard Trainer/AdamW optimizer with a uniform 5e-5 lear
 
 This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.
 
+Optimization provenance: the selected 5e-5 rate and 3-epoch schedule are consistent with the official DeBERTa-v3-small fine-tuning example, which uses a 4.5e-5 learning rate for three epochs.
+
 ## Data
 
 PolyAI BANKING77 is downloaded from the pinned upstream revision in configuration. The preparation pipeline validates schema, labels, empty text, duplicates, and train/test leakage, then creates deterministic stratified fit/validation splits.

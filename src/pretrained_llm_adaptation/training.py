@@ -230,6 +230,12 @@ def train_frozen(
     validation: list[Sample],
 ) -> dict[str, Any]:
     set_seed(config.training.seed)
+    train = _limit_samples(train, config.training.max_train_samples, config.training.seed)
+    validation = _limit_samples(
+        validation,
+        config.training.max_validation_samples,
+        config.training.seed,
+    )
     model, tokenizer = _load_model(config)
     for parameter in model.parameters():
         parameter.requires_grad = False

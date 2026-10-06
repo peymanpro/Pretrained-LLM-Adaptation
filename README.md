@@ -3,7 +3,7 @@
 I built this project to answer a practical question: **how do I take a pretrained language model, adapt it to a real downstream NLP task, and still keep the whole process measurable and reproducible?**
 
 <p align="center">
-  <img src="assets/adaptation-cycle.svg" alt="Animated workflow of my pretrained LLM adaptation process" width="900">
+  <img src="assets/adaptation-cycle.svg" alt="Workflow of my pretrained LLM adaptation process" width="900">
 </p>
 
 > **My focus:** move beyond simply knowing how LLMs work and demonstrate how I engineer, measure, debug, and reproduce an actual model-adaptation workflow.

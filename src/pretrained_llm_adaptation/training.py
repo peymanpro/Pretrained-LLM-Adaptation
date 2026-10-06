@@ -56,9 +56,18 @@ def _tokenize(tokenizer: Any, samples: list[Sample], max_length: int) -> Any:
     )
 
 
-def _is_head_parameter(name: str) -> bool:
+def _parameter_group_kind(
+    name: str,
+    *,
+    head_learning_rate: float | None,
+    classifier_learning_rate: float | None,
+) -> str:
     lowered = name.lower()
-    return "classifier" in lowered or "pooler" in lowered
+    if classifier_learning_rate is not None and "classifier" in lowered:
+        return "classifier"
+    if head_learning_rate is not None and "pooler" in lowered:
+        return "head"
+    return "base"
 
 
 def _is_no_decay_parameter(name: str) -> bool:
@@ -92,12 +101,22 @@ def _trainer(
             model = model or self.model
             parameter_groups: dict[tuple[str, float], dict[str, Any]] = {}
             head_lr = config.training.head_learning_rate
+            classifier_lr = config.training.classifier_learning_rate
 
             for name, parameter in model.named_parameters():
                 if not parameter.requires_grad:
                     continue
-                kind = "head" if head_lr is not None and _is_head_parameter(name) else "base"
-                lr = head_lr if kind == "head" and head_lr is not None else self.args.learning_rate
+                kind = _parameter_group_kind(
+                    name,
+                    head_learning_rate=head_lr,
+                    classifier_learning_rate=classifier_lr,
+                )
+                if kind == "classifier" and classifier_lr is not None:
+                    lr = classifier_lr
+                elif kind == "head" and head_lr is not None:
+                    lr = head_lr
+                else:
+                    lr = self.args.learning_rate
                 weight_decay = (
                     0.0 if _is_no_decay_parameter(name) else self.args.weight_decay
                 )
@@ -230,6 +249,7 @@ def _write_metadata(
         "effective_learning_rates": {
             "base": config.training.learning_rate,
             "head": config.training.head_learning_rate,
+            "classifier": config.training.classifier_learning_rate,
         },
         "environment": _environment_metadata(),
     }

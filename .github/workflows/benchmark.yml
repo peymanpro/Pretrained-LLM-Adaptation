@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: benchmark-${{ github.workflow }}-${{ github.sha }}
+  group: benchmark-${{ github.workflow }}
   cancel-in-progress: true
 env:
   PYTHONUNBUFFERED: "1"

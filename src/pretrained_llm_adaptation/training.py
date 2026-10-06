@@ -177,11 +177,6 @@ def _write_metadata(
         "train_samples": train_size,
         "validation_samples": validation_size,
         "training_result": training_result,
-        "effective_learning_rates": {
-            "base": config.training.learning_rate,
-            "head": config.training.head_learning_rate,
-            "classifier": config.training.classifier_learning_rate,
-        },
         "environment": _environment_metadata(),
     }
     output_dir.mkdir(parents=True, exist_ok=True)

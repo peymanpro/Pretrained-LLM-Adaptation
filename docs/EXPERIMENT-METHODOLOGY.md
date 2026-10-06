@@ -7,12 +7,12 @@ The final portfolio benchmark is resource-bounded so that the complete pipeline 
 The protocol uses the full public BANKING77 test split for final evaluation while limiting training runs to deterministic stratified subsets recorded in the configuration and run metadata. Any exact normalized text overlap between the upstream train and test files is removed from the training pool, and repeated normalized texts within the training pool are collapsed deterministically before the validation split.
 
 Training allocation:
-- frozen baseline: 600 training examples and 200 validation examples for 10 epochs;
-- LoRA rank selection: 600 training examples and 200 validation examples for each of r=4, r=8, and r=16 for 10 epochs;
-- final LoRA run: 1,200 training examples and 300 validation examples for 10 epochs;
+- frozen baseline: 600 training examples and 200 validation examples for 2 epochs;
+- LoRA rank selection: 600 training examples and 200 validation examples for each of r=4, r=8, and r=16 for 2 epochs;
+- final LoRA run: 1,200 training examples and 300 validation examples for 2 epochs;
 - final test metrics: full BANKING77 public test split.
 
-The benchmark uses a conservative 2e-5 learning rate. Earlier higher-rate runs became numerically unstable, while the conservative rate remains stable enough to allow meaningful head and LoRA adaptation on the CPU runner. This remains a resource-bounded engineering benchmark rather than a full-data training study.
+The benchmark uses a conservative 2e-5 learning rate. Earlier higher-rate runs became numerically unstable, so the final protocol keeps the lower rate and uses two epochs to stay within the CPU execution budget while allowing more optimization than the earlier one-epoch trial. This remains a resource-bounded engineering benchmark rather than a full-data training study.
 
 This is not presented as a full-data benchmark. Its purpose is to demonstrate a complete, reproducible adaptation workflow under constrained compute.
 

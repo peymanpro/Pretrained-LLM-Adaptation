@@ -39,7 +39,11 @@ def test_invalid_samples_are_reported() -> None:
 
 
 def test_deduplicate_samples_preserves_first_occurrence() -> None:
-    samples = [\n        Sample("Hello", "age_limit"),\n        Sample(" hello ", "age_limit"),\n        Sample("Keep", "card_arrival"),\n    ]
+    samples = [
+        Sample("Hello", "age_limit"),
+        Sample(" hello ", "age_limit"),
+        Sample("Keep", "card_arrival"),
+    ]
     assert deduplicate_samples(samples) == [
         Sample("Hello", "age_limit"),
         Sample("Keep", "card_arrival"),

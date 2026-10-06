@@ -63,7 +63,11 @@ def _is_head_parameter(name: str) -> bool:
 
 def _is_no_decay_parameter(name: str) -> bool:
     lowered = name.lower()
-    return lowered.endswith(".bias") or "layernorm.weight" in lowered or "layer_norm.weight" in lowered
+    return (
+        lowered.endswith(".bias")
+        or "layernorm.weight" in lowered
+        or "layer_norm.weight" in lowered
+    )
 
 
 def _trainer(

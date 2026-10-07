@@ -2,6 +2,8 @@
 
 ## Status
 
+The final release workflow is now automated and will run only after benchmark integrity verification.
+
 **Engineering implementation complete — final empirical benchmark verification in progress.**
 
 The source, data engineering, LoRA adaptation path, evaluation safeguards, inference CLI, CI, and benchmark publication workflow are implemented. No final model-performance claim is made until the current benchmark run produces verified evidence.

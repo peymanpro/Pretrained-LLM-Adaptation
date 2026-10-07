@@ -22,10 +22,10 @@ The GitHub Actions benchmark currently uses these configurations:
 | Stage | Configuration | Train cap | Validation cap | Epochs | Max length |
 |---|---|---:|---:|---:|---:|
 | Frozen DeBERTa | `configs/ci-frozen.yaml` | 600 | 200 | 2 | 48 |
-| LoRA rank 4 | `configs/ci-r4.yaml` | 3,000 | 1,000 | 1 | 48 |
-| LoRA rank 8 | `configs/ci-r8.yaml` | 3,000 | 1,000 | 1 | 48 |
-| LoRA rank 16 | `configs/ci-r16.yaml` | 3,000 | 1,000 | 1 | 48 |
-| Final LoRA | `configs/ci-final.yaml` | 1,200 | 300 | 3 | 48 |
+| LoRA rank 4 | `configs/ci-r4.yaml` | 600 | 200 | 2 | 48 |
+| LoRA rank 8 | `configs/ci-r8.yaml` | 600 | 200 | 2 | 48 |
+| LoRA rank 16 | `configs/ci-r16.yaml` | 600 | 200 | 2 | 48 |
+| Final LoRA | `configs/ci-final.yaml` | 1,200 | 300 | 2 | 48 |
 | Final evaluation | — | — | — | — | 48 |
 
 The final evaluation uses the complete 3,080-example public BANKING77 test split.

@@ -42,7 +42,7 @@ class TrainingConfig:
     per_device_train_batch_size: int = 16
     per_device_eval_batch_size: int = 32
     gradient_accumulation_steps: int = 1
-    num_train_epochs: float = 3.0
+    num_train_epochs: float = 2.0
     weight_decay: float = 0.01
     warmup_ratio: float = 0.1
     eval_strategy: str = "epoch"

@@ -306,15 +306,15 @@ jobs:
           cp "docs/BENCHMARK-REPORT.md" "$release_dir/BENCHMARK-REPORT.md"
           cp "experiments/selected-rank.json" "$release_dir/selected-rank.json"
           cp "experiments/summary.json" "$release_dir/summary.json"
-          cp "artifacts/runs/selected-r${selected_rank}-final/adapter_model.safetensors" "$release_dir/adapter_model.safetensors"
-          cp "artifacts/runs/selected-r${selected_rank}-final/adapter_config.json" "$release_dir/adapter_config.json"
-          cp "artifacts/runs/selected-r${selected_rank}-final/tokenizer_config.json" "$release_dir/tokenizer_config.json"
-          cp "artifacts/runs/selected-r${selected_rank}-final/run_metadata.json" "$release_dir/run_metadata.json"
-          if [ -f "artifacts/runs/selected-r${selected_rank}-final/tokenizer.json" ]; then
-            cp "artifacts/runs/selected-r${selected_rank}-final/tokenizer.json" "$release_dir/tokenizer.json"
+          cp "published/artifacts/runs/selected-r${selected_rank}-final/adapter_model.safetensors" "$release_dir/adapter_model.safetensors"
+          cp "published/artifacts/runs/selected-r${selected_rank}-final/adapter_config.json" "$release_dir/adapter_config.json"
+          cp "published/artifacts/runs/selected-r${selected_rank}-final/tokenizer_config.json" "$release_dir/tokenizer_config.json"
+          cp "published/artifacts/runs/selected-r${selected_rank}-final/run_metadata.json" "$release_dir/run_metadata.json"
+          if [ -f "published/artifacts/runs/selected-r${selected_rank}-final/tokenizer.json" ]; then
+            cp "published/artifacts/runs/selected-r${selected_rank}-final/tokenizer.json" "$release_dir/tokenizer.json"
           fi
-          if [ -f "artifacts/runs/selected-r${selected_rank}-final/spm.model" ]; then
-            cp "artifacts/runs/selected-r${selected_rank}-final/spm.model" "$release_dir/spm.model"
+          if [ -f "published/artifacts/runs/selected-r${selected_rank}-final/spm.model" ]; then
+            cp "published/artifacts/runs/selected-r${selected_rank}-final/spm.model" "$release_dir/spm.model"
           fi
 
           if gh release view v0.1.0 >/dev/null 2>&1; then

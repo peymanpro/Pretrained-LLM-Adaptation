@@ -264,13 +264,65 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { name: final-benchmark-evidence, path: published }
-      - name: Publish verified evidence
+      - name: Publish verified evidence and mark release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cp -r published/experiments/. experiments/
           cp published/docs/BENCHMARK-REPORT.md docs/BENCHMARK-REPORT.md
+
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              "README.md": (
+                  "**Engineering implementation complete — final empirical verification in progress.**",
+                  "**Released v0.1.0 — benchmark verified.**",
+              ),
+              "docs/PROJECT-SCOPE.md": (
+                  "**Engineering implementation complete — final empirical benchmark verification in progress.**",
+                  "**Released v0.1.0 — benchmark verified.**",
+              ),
+          }
+
+          for name, (old, new) in replacements.items():
+              path = Path(name)
+              text = path.read_text(encoding="utf-8")
+              if old not in text:
+                  raise SystemExit(f"expected release status not found in {name}")
+              path.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add experiments docs/BENCHMARK-REPORT.md
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "docs: publish verified benchmark evidence"
+          git add experiments docs/BENCHMARK-REPORT.md README.md docs/PROJECT-SCOPE.md
+          git commit -m "release: publish verified benchmark v0.1.0"
           git push origin HEAD:main
+
+          selected_rank=$(python -c 'import json; print(json.load(open("experiments/selected-rank.json"))["selected"]["rank"])')
+          release_dir="release-assets"
+          mkdir -p "$release_dir"
+
+          cp "docs/BENCHMARK-REPORT.md" "$release_dir/BENCHMARK-REPORT.md"
+          cp "experiments/selected-rank.json" "$release_dir/selected-rank.json"
+          cp "experiments/summary.json" "$release_dir/summary.json"
+          cp "artifacts/runs/selected-r${selected_rank}-final/adapter_model.safetensors" "$release_dir/adapter_model.safetensors"
+          cp "artifacts/runs/selected-r${selected_rank}-final/adapter_config.json" "$release_dir/adapter_config.json"
+          cp "artifacts/runs/selected-r${selected_rank}-final/tokenizer_config.json" "$release_dir/tokenizer_config.json"
+          cp "artifacts/runs/selected-r${selected_rank}-final/run_metadata.json" "$release_dir/run_metadata.json"
+          if [ -f "artifacts/runs/selected-r${selected_rank}-final/tokenizer.json" ]; then
+            cp "artifacts/runs/selected-r${selected_rank}-final/tokenizer.json" "$release_dir/tokenizer.json"
+          fi
+          if [ -f "artifacts/runs/selected-r${selected_rank}-final/spm.model" ]; then
+            cp "artifacts/runs/selected-r${selected_rank}-final/spm.model" "$release_dir/spm.model"
+          fi
+
+          if gh release view v0.1.0 >/dev/null 2>&1; then
+            echo "v0.1.0 already exists; leaving existing release unchanged."
+          else
+            gh release create v0.1.0 \
+              --target "$(git rev-parse HEAD)" \
+              --title "v0.1.0 — Pretrained LLM Adaptation" \
+              --notes-file docs/BENCHMARK-REPORT.md \
+              "$release_dir"/*
+          fi

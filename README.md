@@ -140,10 +140,10 @@ The current benchmark protocol is:
 | Stage | Training data | Validation data | Epochs | Max length |
 |---|---:|---:|---:|---:|
 | Frozen DeBERTa | 600 | 200 | 2 | 48 |
-| LoRA rank 4 | 3,000 | 1,000 | 1 | 48 |
-| LoRA rank 8 | 3,000 | 1,000 | 1 | 48 |
-| LoRA rank 16 | 3,000 | 1,000 | 1 | 48 |
-| Final LoRA | 1,200 | 300 | 3 | 48 |
+| LoRA rank 4 | 600 | 200 | 2 | 48 |
+| LoRA rank 8 | 600 | 200 | 2 | 48 |
+| LoRA rank 16 | 600 | 200 | 2 | 48 |
+| Final LoRA | 1,200 | 300 | 2 | 48 |
 | Final evaluation | — | — | — | Full 3,080-example test split |
 
 Common benchmark settings include:

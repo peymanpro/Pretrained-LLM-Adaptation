@@ -33,6 +33,7 @@ The final evaluation uses the complete 3,080-example public BANKING77 test split
 The rank-ablation configurations use:
 
 - adapter learning rate: `2e-5`;
+- task-head learning rate: `1e-4`;
 - per-device training batch size: 32;
 - per-device evaluation batch size: 64;
 - weight decay: `0.01`;
@@ -134,7 +135,7 @@ Additional evidence includes:
 
 The evaluation path rejects non-finite logits and probabilities.
 
-For final benchmark evidence, a classifier whose predictions collapse to fewer than two unique intents is rejected. The benchmark integrity gate is stricter and requires at least five distinct predicted intents in the final evaluation artifact.
+For final benchmark evidence, a classifier whose predictions collapse to fewer than two unique intents is rejected. The benchmark integrity gate is stricter and requires at least ten distinct predicted intents in the final evaluation artifact.
 
 ## Error analysis
 

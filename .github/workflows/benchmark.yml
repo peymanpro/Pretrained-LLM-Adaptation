@@ -188,13 +188,25 @@ jobs:
           distinct = {row["predicted"] for row in predictions}
           if len(predictions) < 1000:
               raise SystemExit(f"final evaluation is unexpectedly small: {len(predictions)}")
-          if len(distinct) < 5:
-              raise SystemExit(f"final classifier appears collapsed: {len(distinct)} distinct predictions")
+          if len(distinct) < 10:
+              raise SystemExit(
+                  f"final classifier prediction diversity is too low: {len(distinct)} distinct intents"
+              )
 
+          metrics = evaluation["report"]["metrics"]
           for metric in ("accuracy", "macro_f1", "weighted_f1"):
-              value = float(evaluation["report"]["metrics"][metric])
+              value = float(metrics[metric])
               if not 0.0 <= value <= 1.0:
                   raise SystemExit(f"invalid {metric}: {value}")
+
+          # A 77-class task has a ~1.3% chance baseline. Require a clearly
+          # non-degenerate final result before publishing portfolio evidence.
+          if float(metrics["accuracy"]) < 0.10 or float(metrics["macro_f1"]) < 0.10:
+              raise SystemExit(
+                  "final model quality is below the release threshold: "
+                  f"accuracy={float(metrics['accuracy']):.4f}, "
+                  f"macro_f1={float(metrics['macro_f1']):.4f}"
+              )
 
           names = {row["experiment"] for row in summary["experiments"]}
           required = {"B0 Majority", "B1 TF-IDF + LR", "B2 Frozen DeBERTa"}

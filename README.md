@@ -158,6 +158,8 @@ Common benchmark settings include:
 - random seed: 42;
 - CPU training with fp16/bf16 disabled.
 
+Task-head parameters use a higher learning rate than LoRA parameters because the classification head and pooler are newly initialized for the downstream task; this separates head fitting from conservative encoder adaptation.
+
 The LoRA rank is selected using **validation macro F1**. The selected rank is then retrained using the larger final allocation and evaluated once on the held-out test set.
 
 This is an engineering benchmark under constrained compute, not a full-data or state-of-the-art study.

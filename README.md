@@ -148,7 +148,8 @@ The current benchmark protocol is:
 
 Common benchmark settings include:
 
-- learning rate: `5e-5`;
+- adapter learning rate: `2e-5`;
+- task-head learning rate: `1e-4`;
 - AdamW;
 - weight decay: `0.01`;
 - warmup ratio: `0.1`;

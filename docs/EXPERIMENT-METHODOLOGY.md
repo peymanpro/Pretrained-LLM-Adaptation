@@ -32,7 +32,7 @@ The final evaluation uses the complete 3,080-example public BANKING77 test split
 
 The rank-ablation configurations use:
 
-- learning rate: `5e-5`;
+- adapter learning rate: `2e-5`;
 - per-device training batch size: 32;
 - per-device evaluation batch size: 64;
 - weight decay: `0.01`;

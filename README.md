@@ -465,6 +465,10 @@ The benchmark uses constrained training subsets for reproducibility and CPU feas
 
 The conclusions also do not automatically generalize to multilingual, multi-domain, generative, or large-scale language-model adaptation.
 
+## Relationship to evaluation
+
+This repository concentrates on the **model adaptation lifecycle**: dataset validation, baselines, LoRA/PEFT training, held-out evaluation, error analysis, and reproducible inference. [AI Evaluation Engineering](https://github.com/peymanpro/AI-Evaluation-Engineering) addresses a complementary concern: reusable graders, regression gates, adversarial evaluation, and statistical comparison. They are separate projects; this repository does not depend on the evaluation framework.
+
 ## References
 
 - BANKING77 dataset: https://huggingface.co/datasets/PolyAI/banking77

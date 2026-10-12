@@ -478,6 +478,12 @@ This repository concentrates on the **model adaptation lifecycle**: dataset vali
 - PEFT troubleshooting: https://huggingface.co/docs/peft/main/developer_guides/troubleshooting
 - Original BANKING77 repository: https://github.com/PolyAI-LDN/task-specific-datasets
 
+## Automated releases
+
+The release workflow validates the package version in `pyproject.toml`, runs Ruff lint and formatting checks, mypy, the unit tests, and the CLI version smoke test, then builds and attaches the Python distributions to a GitHub Release. Model-training/benchmark workflows remain separate; a release does not itself claim that every optional training benchmark has run.
+
+To publish a future version, increment `[project].version` in `pyproject.toml` and push the change to `main`, or push a matching `vMAJOR.MINOR.PATCH` tag. The workflow will not overwrite an existing tag or publish a duplicate release.
+
 ## License
 
 MIT

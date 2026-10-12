@@ -63,11 +63,7 @@ def _is_head_parameter(name: str) -> bool:
 
 def _is_no_decay_parameter(name: str) -> bool:
     lowered = name.lower()
-    return (
-        lowered.endswith(".bias")
-        or "layernorm.weight" in lowered
-        or "layer_norm.weight" in lowered
-    )
+    return lowered.endswith(".bias") or "layernorm.weight" in lowered or "layer_norm.weight" in lowered
 
 
 def _trainer(
@@ -97,19 +93,9 @@ def _trainer(
                 if not parameter.requires_grad:
                     continue
 
-                kind = (
-                    "head"
-                    if head_lr is not None and _is_head_parameter(name)
-                    else "adaptation"
-                )
-                lr = (
-                    head_lr
-                    if kind == "head" and head_lr is not None
-                    else self.args.learning_rate
-                )
-                weight_decay = (
-                    0.0 if _is_no_decay_parameter(name) else self.args.weight_decay
-                )
+                kind = "head" if head_lr is not None and _is_head_parameter(name) else "adaptation"
+                lr = head_lr if kind == "head" and head_lr is not None else self.args.learning_rate
+                weight_decay = 0.0 if _is_no_decay_parameter(name) else self.args.weight_decay
                 key = (kind, weight_decay)
 
                 if key not in parameter_groups:

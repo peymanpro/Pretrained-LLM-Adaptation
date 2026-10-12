@@ -81,7 +81,9 @@ def _trainer(
     except ImportError as exc:
         raise RuntimeError("Transformers is required for training.") from exc
 
-    class AdaptationTrainer(Trainer):
+    class AdaptationTrainer(Trainer):  # type: ignore[misc]
+        optimizer: Any
+
         def create_optimizer(self, model: Any = None) -> Any:
             if self.optimizer is not None:
                 return self.optimizer
